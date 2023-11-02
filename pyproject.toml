@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eurelis_kb_framework"
+version = "0.0.1"
+authors = [
+  { name="Jérôme DIAZ", email="j.diaz@eurelis.com" },
+  { name="Vincent LAMBERT", email="v.lambert@eurelis.com" }
+]
+description = "Framework to construct and exploit knowledge base. Based on Langchain under the hood."
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Eurelis/Eurelis-KB-Framework"
+"Bug Tracker" = "https://github.com/Eurelis/Eurelis-KB-Framework/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
