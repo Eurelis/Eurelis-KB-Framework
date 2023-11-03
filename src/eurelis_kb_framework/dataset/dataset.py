@@ -167,9 +167,6 @@ class Dataset(BaseLoader):
             "metadata": document.metadata,
         }
 
-        print(document.metadata)
-        print(self.output_file_varname)
-
         relative_path = document.metadata.get(self.output_file_varname)
 
         if self.splitter:
@@ -206,20 +203,16 @@ class Dataset(BaseLoader):
             documents = self.loader.load()
 
         if not self.transformer and not self.metadata:  # if no transformer was defined
-            print("A")
             yield from documents
         elif not self.transformer:
-            print("B")
             for doc in documents:
                 doc.metadata.update(self.metadata)
                 yield doc
         elif self.metadata:
-            print("c")
             for doc in documents:  # for each document we proceed to transformation
                 doc.metadata.update(self.metadata)
                 yield from self.transformer.transform_documents([doc])
         else:
-            print("D")
             for doc in documents:  # for each document we proceed to transformation
                 yield from self.transformer.transform_documents([doc])
 

@@ -24,9 +24,11 @@ SENTENCE_TRANSFORMER_TOKEN_TEXT_SPLITTER_ALLOWED_PARAMS = {
     "tokens_per_chunk",
 }
 
-RECURSIVE_CHARACTER_TEXT_SPLITER_ALLOWED_PARAMS = (
-    {"separators", "keep_separator", "is_separator_regex"},
-)
+RECURSIVE_CHARACTER_TEXT_SPLITER_ALLOWED_PARAMS = {
+    "separators",
+    "keep_separator",
+    "is_separator_regex",
+}
 
 NLTK_TEXT_SPLITTER_ALLOWED_PARAMS = {"separator", "language"}
 
