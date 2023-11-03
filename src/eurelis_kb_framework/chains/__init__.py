@@ -32,7 +32,7 @@ class GenericChainsFactory(BaseFactory[Chain]):
         """
         self.retriever_kwargs = kwargs if kwargs else {}
 
-    def build(self, context: 'LangchainWrapper') -> Chain:
+    def build(self, context: "LangchainWrapper") -> Chain:
         """
         Construct the chain
 
@@ -50,13 +50,15 @@ class GenericChainsFactory(BaseFactory[Chain]):
             memory_key="chat_history",
             return_messages=True,
             input_key="question",
-            output_key="answer")
+            output_key="answer",
+        )
 
         return ConversationalRetrievalChain.from_llm(
             context.lazy_get_llm(),
             retriever=context.vector_store.as_retriever(**self.retriever_kwargs),
             return_source_documents=True,
-            memory=memory)
+            memory=memory,
+        )
 
         # from langchain.prompts.chat import (
         #     ChatPromptTemplate,
@@ -79,5 +81,3 @@ class GenericChainsFactory(BaseFactory[Chain]):
         #    return_source_documents=True,
         #    chain_type_kwargs=chain_type_kwargs
         # )
-
-

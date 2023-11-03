@@ -1,8 +1,6 @@
-from typing import List
-
-from eurelis_kb_framework.base_factory import BaseFactory
 from rich.console import Console
 
+from eurelis_kb_framework.base_factory import BaseFactory
 from eurelis_kb_framework.output.base_console_output import BaseConsoleOutput
 
 
@@ -38,7 +36,10 @@ class ConsoleOutputFactory(BaseFactory[BaseConsoleOutput]):
         rich_console = Console()
 
         if self.is_verbose:
-            from eurelis_kb_framework.output.verbose_console_output import VerboseConsoleOutput
+            from eurelis_kb_framework.output.verbose_console_output import (
+                VerboseConsoleOutput,
+            )
+
             return VerboseConsoleOutput(rich_console)
 
         return BaseConsoleOutput(rich_console)

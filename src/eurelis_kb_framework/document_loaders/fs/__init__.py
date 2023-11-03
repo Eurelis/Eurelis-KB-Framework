@@ -1,6 +1,6 @@
+from langchain.document_loaders.base import BaseLoader
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory, FACTORY
-from langchain.document_loaders.base import BaseLoader
 
 
 class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
@@ -8,12 +8,7 @@ class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
     File System Loader Factory
     """
 
-    OPTIONAL_PARAMS = {
-        'glob',
-        'exclude',
-        'suffixes',
-        'show_progress'
-    }
+    OPTIONAL_PARAMS = {"glob", "exclude", "suffixes", "show_progress"}
 
     def __init__(self):
         """
@@ -55,10 +50,13 @@ class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
         Returns:
 
         """
-        if self.parser_data and self.parser_data != 'default':
-            parser = context.loader.instantiate_factory("eurelis_kb_framework.parsers", "GenericBlobParserFactory",
-                                                        self.parser_data)
-            arguments['parser'] = parser.build(context)
+        if self.parser_data and self.parser_data != "default":
+            parser = context.loader.instantiate_factory(
+                "eurelis_kb_framework.parsers",
+                "GenericBlobParserFactory",
+                self.parser_data,
+            )
+            arguments["parser"] = parser.build(context)
 
     def build(self, context) -> BaseLoader:
         """
@@ -76,7 +74,4 @@ class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
         arguments = self.get_optional_params()
         self._process_parser_data(context, arguments)
 
-        return GenericLoader.from_filesystem(
-            self.path,
-            **arguments
-        )
+        return GenericLoader.from_filesystem(self.path, **arguments)

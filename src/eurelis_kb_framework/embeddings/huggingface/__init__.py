@@ -4,13 +4,7 @@ from eurelis_kb_framework.base_factory import ParamsDictFactory
 
 
 class HuggingFaceEmbeddingsFactory(ParamsDictFactory[Embeddings]):
-
-    OPTIONAL_PARAMS = {
-        'cache_folder',
-        'encode_kwargs',
-        'model_name',
-        'multi_process'
-    }
+    OPTIONAL_PARAMS = {"cache_folder", "encode_kwargs", "model_name", "multi_process"}
 
     def build(self, context) -> Embeddings:
         """

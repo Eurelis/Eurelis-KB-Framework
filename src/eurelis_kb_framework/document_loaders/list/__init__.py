@@ -1,9 +1,8 @@
-
-from eurelis_kb_framework.base_factory import ParamsDictFactory, FACTORY
-
-from langchain.document_loaders.base import BaseLoader
 from typing import Iterable
 
+from langchain.document_loaders.base import BaseLoader
+
+from eurelis_kb_framework.base_factory import ParamsDictFactory, FACTORY
 from eurelis_kb_framework.document_loaders.list.list_loader import ListLoader
 
 
@@ -70,7 +69,9 @@ class ListLoaderFactory(ParamsDictFactory[BaseLoader]):
             missing_parameters.append("loader_target_name")
 
         if missing_parameters:
-            raise ValueError(f"List document loader is missing following required parameters: {str(missing_parameters)}")
+            raise ValueError(
+                f"List document loader is missing following required parameters: {str(missing_parameters)}"
+            )
 
     def build(self, context) -> BaseLoader:
         """
@@ -84,10 +85,5 @@ class ListLoaderFactory(ParamsDictFactory[BaseLoader]):
         self._ensure_required_parameters()
 
         return ListLoader(
-            self.targets,
-            self.loader,
-            self.loader_target_name,
-            self.params,
-            context
+            self.targets, self.loader, self.loader_target_name, self.params, context
         )
-

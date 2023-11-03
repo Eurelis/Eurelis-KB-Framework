@@ -1,16 +1,24 @@
+from typing import Iterable, List, Iterator
+
+from langchain.document_loaders.base import BaseLoader
 from langchain.schema import Document
 
 from eurelis_kb_framework.base_factory import BaseFactory
-from langchain.document_loaders.base import BaseLoader
-
-from typing import Iterable, List, Iterator
 
 
 class ListLoader(BaseLoader):
     """
     List loader class to transform a single target based loader into a multi target one
     """
-    def __init__(self, targets: Iterable[str], loader: BaseFactory[BaseLoader], varname: str, parameters: dict, context):
+
+    def __init__(
+        self,
+        targets: Iterable[str],
+        loader: BaseFactory[BaseLoader],
+        varname: str,
+        parameters: dict,
+        context,
+    ):
         """
         Constructor
         Args:
@@ -46,7 +54,8 @@ class ListLoader(BaseLoader):
             loader_factory = self.context.loader.instantiate_factory(
                 "eurelis_kb_framework.document_loaders",
                 "GenericLoaderFactory",
-                self.loader.copy())
+                self.loader.copy(),
+            )
             loader_factory.set_params(params)
             print(params)
 

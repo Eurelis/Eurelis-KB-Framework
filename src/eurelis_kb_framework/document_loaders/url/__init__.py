@@ -1,7 +1,6 @@
+from langchain.document_loaders.base import BaseLoader
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
-
-from langchain.document_loaders.base import BaseLoader
 
 
 class UrlLoaderFactory(ParamsDictFactory[BaseLoader]):
@@ -10,13 +9,13 @@ class UrlLoaderFactory(ParamsDictFactory[BaseLoader]):
     """
 
     OPTIONAL_PARAMS = {
-        'use_async',
-        'exclude_dirs',
-        'timeout',
-        'prevent_outside',
-        'link_regex',
-        'headers',
-        'check_response_status'
+        "use_async",
+        "exclude_dirs",
+        "timeout",
+        "prevent_outside",
+        "link_regex",
+        "headers",
+        "check_response_status",
     }
 
     def __init__(self):
@@ -58,7 +57,7 @@ class UrlLoaderFactory(ParamsDictFactory[BaseLoader]):
         Returns:
 
         """
-        self.params['max_depth'] = max(1, max_depth)
+        self.params["max_depth"] = max(1, max_depth)
         if max_depth > 1:
             self.is_recursive = True
 
@@ -75,9 +74,6 @@ class UrlLoaderFactory(ParamsDictFactory[BaseLoader]):
         from langchain.document_loaders.recursive_url_loader import RecursiveUrlLoader
 
         if not self.is_recursive:
-            self.params['max_depth'] = 1
+            self.params["max_depth"] = 1
 
-        return RecursiveUrlLoader(
-            self.url,
-            **self.params
-        )
+        return RecursiveUrlLoader(self.url, **self.params)

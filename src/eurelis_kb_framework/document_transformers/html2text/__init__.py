@@ -1,6 +1,6 @@
-
-from eurelis_kb_framework.base_factory import BaseFactory, T
 from langchain.schema import BaseDocumentTransformer
+
+from eurelis_kb_framework.base_factory import BaseFactory
 
 
 class Html2TextTransformerFactory(BaseFactory[BaseDocumentTransformer]):

@@ -14,11 +14,14 @@ T = TypeVar("T")
 class DefaultFactories(Enum):
     DOCUMENT_LOADER = ("eurelis_kb_framework.document_loaders", "GenericLoaderFactory")
     SPLITTER = ("eurelis_kb_framework.text_splitter", "GenericTextSplitterFactory")
-    TRANSFORMER = ('eurelis_kb_framework.document_transformers', 'GenericDocumentTransformersFactory')
-    VECTORSTORE = ('eurelis_kb_framework.vectorstores', 'GenericVectorStoreFactory')
-    LLM = ('eurelis_kb_framework.llms', 'GenericLLMFactory')
-    CHAIN = ('eurelis_kb_framework.chains', 'GenericChainsFactory')
-    EMBEDDINGS = ('eurelis_kb_framework.embeddings', 'GenericEmbeddingsFactory')
+    TRANSFORMER = (
+        "eurelis_kb_framework.document_transformers",
+        "GenericDocumentTransformersFactory",
+    )
+    VECTORSTORE = ("eurelis_kb_framework.vectorstores", "GenericVectorStoreFactory")
+    LLM = ("eurelis_kb_framework.llms", "GenericLLMFactory")
+    CHAIN = ("eurelis_kb_framework.chains", "GenericChainsFactory")
+    EMBEDDINGS = ("eurelis_kb_framework.embeddings", "GenericEmbeddingsFactory")
 
 
 class BaseFactory(ABC, Generic[T]):
@@ -35,12 +38,12 @@ class BaseFactory(ABC, Generic[T]):
         """
 
         for key, value in params.items():  # we iterate on params
-            if isinstance(value, str) and value[0] == '$':
+            if isinstance(value, str) and value[0] == "$":
                 # if the value start with an $, it is assumed to be the name of an environment variable
                 # use $$ prefix to escape this mode
                 var_name = value[1:]
 
-                if var_name[0] != '$':  # if it wasn't an escaped prefix
+                if var_name[0] != "$":  # if it wasn't an escaped prefix
                     if var_name in os.environ:
                         value = os.environ.get(var_name)
                     else:
@@ -70,7 +73,7 @@ class BaseFactory(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    def build(self, context: 'BaseContext') -> T:
+    def build(self, context: "BaseContext") -> T:
         """
         Methods to build something
 
@@ -135,10 +138,12 @@ class ParamsDictFactory(BaseFactory, Generic[T]):
         Returns:
             params (dict)
         """
-        if hasattr(self.__class__, 'OPTIONAL_PARAMS'):
+        if hasattr(self.__class__, "OPTIONAL_PARAMS"):
             return self.extract_params(self.__class__.OPTIONAL_PARAMS)
 
-        raise RuntimeError(f"Factory {self.__class__.__name__} does not provide OPTIONAL_PARAMS value")
+        raise RuntimeError(
+            f"Factory {self.__class__.__name__} does not provide OPTIONAL_PARAMS value"
+        )
 
 
 class ProviderFactory(ParamsDictFactory, Generic[T]):
@@ -159,21 +164,32 @@ class ProviderFactory(ParamsDictFactory, Generic[T]):
             BaseFactory: the factory associated with a given provider name
 
         """
-        provider = self.params.get('provider')
+        provider = self.params.get("provider")
         if not provider or provider not in self.__class__.ALLOWED_PROVIDERS:
-            allowed_list = "'" + "', '".join(self.__class__.ALLOWED_PROVIDERS.keys()) + "'"
-            raise ValueError(f"Expected one of the following provider {allowed_list} got '{provider}'")
+            allowed_list = (
+                "'" + "', '".join(self.__class__.ALLOWED_PROVIDERS.keys()) + "'"
+            )
+            raise ValueError(
+                f"Expected one of the following provider {allowed_list} got '{provider}'"
+            )
 
         provider_class = self.__class__.ALLOWED_PROVIDERS.get(provider)
 
         import inspect
-        if inspect.isclass(provider_class):  # the associated value in the dictionary is already a class
+
+        if inspect.isclass(
+            provider_class
+        ):  # the associated value in the dictionary is already a class
             return provider_class()  # we instantiate it
 
-        elif isinstance(provider_class, str):  # the associated value in the dictionary is a string
-            return context.loader.instantiate_class('', provider_class)  # we use the class loader to instantiate it, no default module name
+        elif isinstance(
+            provider_class, str
+        ):  # the associated value in the dictionary is a string
+            return context.loader.instantiate_class(
+                "", provider_class
+            )  # we use the class loader to instantiate it, no default module name
 
-    def build(self, context: 'BaseContext') -> T:
+    def build(self, context: "BaseContext") -> T:
         """
         Methods to build something
 

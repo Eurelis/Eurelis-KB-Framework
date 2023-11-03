@@ -1,13 +1,11 @@
+import os
 from typing import Optional
 
 from .base_factory import BaseFactory, T
 from .langchain_wrapper import LangchainWrapper
 
-import os
-
 
 class LangchainWrapperFactory(BaseFactory[LangchainWrapper]):
-
     def __init__(self):
         self.verbose = False
         self.config_path = None
@@ -58,12 +56,12 @@ class LangchainWrapperFactory(BaseFactory[LangchainWrapper]):
         Returns:
 
         """
-        final_path = os.path.join(dirname, 'config/knowledge_base.json')
+        final_path = os.path.join(dirname, "config/knowledge_base.json")
 
         if path:
             work_path = path if os.path.isabs(path) else os.path.join(dirname, path)
             if os.path.isdir(work_path):
-                final_path = os.path.join(work_path, 'knowledge_base.json')
+                final_path = os.path.join(work_path, "knowledge_base.json")
             else:
                 final_path = work_path
 
@@ -72,13 +70,16 @@ class LangchainWrapperFactory(BaseFactory[LangchainWrapper]):
             exit(-1)
 
         config_folder = os.path.dirname(final_path)
-        env_file = os.path.join(config_folder, '.env')
+        env_file = os.path.join(config_folder, ".env")
         if os.path.exists(env_file) and os.path.isfile(env_file):
             from dotenv import load_dotenv
+
             output.verbose_print(f"Loading environment variables from '{env_file}'")
             load_dotenv(env_file)
         else:
-            output.verbose_print(f"No environment variable file found at '{config_folder}'")
+            output.verbose_print(
+                f"No environment variable file found at '{config_folder}'"
+            )
 
         return final_path
 
@@ -100,12 +101,17 @@ class LangchainWrapperFactory(BaseFactory[LangchainWrapper]):
         console_output_factory.set_verbose(self.verbose)
         console_output = console_output_factory.build(context)
 
-        final_path = LangchainWrapperFactory.get_config_final_path(console_output, self.base_dir, self.config_path)
+        final_path = LangchainWrapperFactory.get_config_final_path(
+            console_output, self.base_dir, self.config_path
+        )
 
         console_output.print(f"Preparing langchain wrapper")
         wrapper = LangchainWrapper()
         wrapper.set_console(console_output)
 
-        console_output.status(f"Reading configuration from {str(final_path)}", lambda: wrapper.load_config(final_path))
+        console_output.status(
+            f"Reading configuration from {str(final_path)}",
+            lambda: wrapper.load_config(final_path),
+        )
 
         return wrapper

@@ -1,11 +1,15 @@
 from collections import OrderedDict
 
+from eurelis_kb_framework.base_factory import (
+    ParamsDictFactory,
+    FACTORY,
+    DefaultFactories,
+    JSON,
+)
 from eurelis_kb_framework.dataset.dataset import Dataset
-from eurelis_kb_framework.base_factory import ParamsDictFactory, FACTORY, DefaultFactories, JSON
 
 
 class DatasetFactory(ParamsDictFactory[Dataset]):
-
     def __init__(self):
         super().__init__()
         self.id = None
@@ -92,7 +96,7 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
         Returns:
 
         """
-        output = self.params.get('output')
+        output = self.params.get("output")
 
         output_folder = None
         output_file_varname = "id"
@@ -101,8 +105,8 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
             if isinstance(output, str):
                 output_folder = output
             elif isinstance(output, dict):
-                output_folder = output.get('folder')
-                output_file_varname = output.get('varname', "id")
+                output_folder = output.get("folder")
+                output_file_varname = output.get("varname", "id")
 
         instance.set_output_folder(output_folder)
         instance.set_output_file_varname(output_file_varname)
@@ -116,7 +120,7 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
         Returns:
 
         """
-        index = self.params.get('index')
+        index = self.params.get("index")
 
         instance.set_index(index)
 
@@ -130,28 +134,32 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
             a dataset instance
 
         """
-        loader = context.__class__.get_instance_from_factory(context,
-                                                             DefaultFactories.DOCUMENT_LOADER,
-                                                             self.loader_factory_data,
-                                                             mandatory=True)
-        splitter = context.__class__.get_instance_from_factory(context,
-                                                               DefaultFactories.SPLITTER,
-                                                               self.splitter_factory_data)
-        transformer = context.__class__.get_instance_from_factory(context,
-                                                                  DefaultFactories.TRANSFORMER,
-                                                                  self.transformer_factory_data)
+        loader = context.__class__.get_instance_from_factory(
+            context,
+            DefaultFactories.DOCUMENT_LOADER,
+            self.loader_factory_data,
+            mandatory=True,
+        )
+        splitter = context.__class__.get_instance_from_factory(
+            context, DefaultFactories.SPLITTER, self.splitter_factory_data
+        )
+        transformer = context.__class__.get_instance_from_factory(
+            context, DefaultFactories.TRANSFORMER, self.transformer_factory_data
+        )
         instance = Dataset(self.id, loader)
 
         if self.embeddings_data:
-            embeddings = context.__class__.get_instance_from_factory(context,
-                                                                     DefaultFactories.EMBEDDINGS,
-                                                                     self.embeddings_data)
+            embeddings = context.__class__.get_instance_from_factory(
+                context, DefaultFactories.EMBEDDINGS, self.embeddings_data
+            )
             if embeddings:
                 local_context = context.copy_context()
                 local_context.embeddings = embeddings
-                vector_store = context.__class__.get_instance_from_factory(local_context,
-                                                                           DefaultFactories.VECTORSTORE,
-                                                                           context.vector_store_data)
+                vector_store = context.__class__.get_instance_from_factory(
+                    local_context,
+                    DefaultFactories.VECTORSTORE,
+                    context.vector_store_data,
+                )
                 instance.set_vector_store(vector_store)
 
         if not instance.vector_store:

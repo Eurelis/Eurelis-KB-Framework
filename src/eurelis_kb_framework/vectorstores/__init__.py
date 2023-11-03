@@ -1,4 +1,3 @@
-
 from langchain.schema.vectorstore import VectorStore
 
 from eurelis_kb_framework.base_factory import BaseFactory, ParamsDictFactory
@@ -8,6 +7,7 @@ class GenericVectorStoreFactory(ParamsDictFactory[VectorStore]):
     """
     Generic factory for vector store, delegate to another factory under the hood
     """
+
     def __init__(self):
         """
         Constructor
@@ -34,13 +34,15 @@ class GenericVectorStoreFactory(ParamsDictFactory[VectorStore]):
 
         """
         if not self.provider:
-            raise RuntimeError('GenericEmbeddingsFactory missing provider parameter')
+            raise RuntimeError("GenericEmbeddingsFactory missing provider parameter")
 
-        if self.provider == 'chroma':
+        if self.provider == "chroma":
             from eurelis_kb_framework.vectorstores.chroma import ChromaFactory
+
             return ChromaFactory()
-        elif self.provider == 'solr':
+        elif self.provider == "solr":
             from eurelis_kb_framework.vectorstores.solr import SolrFactory
+
             return SolrFactory()
 
         raise RuntimeError(f"GenericEmbeddingsFactory unknown provider {self.provider}")

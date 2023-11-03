@@ -5,6 +5,7 @@ class BaseConsoleOutput:
     """
     Base output class for non-verbose printing on the console
     """
+
     def __init__(self, console):
         """
         Constructor
@@ -106,4 +107,3 @@ class BaseConsoleOutput:
         Returns:
 
         """
-

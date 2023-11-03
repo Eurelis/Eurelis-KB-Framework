@@ -21,7 +21,7 @@ class BaseContext(ABC):
     Base context class
     """
 
-    def __init__(self, class_loader: ClassLoader, console = None):
+    def __init__(self, class_loader: ClassLoader, console=None):
         self.loader = class_loader
         self.console = console
         self.embeddings = None
@@ -92,16 +92,18 @@ class LangchainWrapper(BaseContext):
         with open(path) as config_file:
             config = json.load(config_file)
 
-            self._parse_embeddings(config.get('embeddings'))
-            self._parse_vector_store(config.get('vectorstore'))
+            self._parse_embeddings(config.get("embeddings"))
+            self._parse_vector_store(config.get("vectorstore"))
 
-            self._parse_dataset(config.get('dataset', []))
+            self._parse_dataset(config.get("dataset", []))
 
-            self.llm_factory = config.get('llm')
-            self.chain_factory = config.get('chain')
+            self.llm_factory = config.get("llm")
+            self.chain_factory = config.get("chain")
 
-            self.project = config.get('project', 'knowledge_base')
-            self.record_manager_db_url = config.get('record_manager', 'sqlite:///record_manager_cache.sql')
+            self.project = config.get("project", "knowledge_base")
+            self.record_manager_db_url = config.get(
+                "record_manager", "sqlite:///record_manager_cache.sql"
+            )
 
     def _parse_dataset(self, datasets: Union[FACTORY, iter[FACTORY]]):
         """
@@ -128,7 +130,9 @@ class LangchainWrapper(BaseContext):
         """
         self.console.verbose_print(f"Reading embeddings from configuration file")
 
-        self.embeddings = LangchainWrapper.get_instance_from_factory(self, DefaultFactories.EMBEDDINGS, embeddings)
+        self.embeddings = LangchainWrapper.get_instance_from_factory(
+            self, DefaultFactories.EMBEDDINGS, embeddings
+        )
 
     def _parse_vector_store(self, vector_store: FACTORY):
         """
@@ -144,7 +148,9 @@ class LangchainWrapper(BaseContext):
 
         self.vector_store_data = vector_store
 
-        self.vector_store = LangchainWrapper.get_instance_from_factory(self, DefaultFactories.VECTORSTORE, vector_store, True)
+        self.vector_store = LangchainWrapper.get_instance_from_factory(
+            self, DefaultFactories.VECTORSTORE, vector_store, True
+        )
 
     def _list_datasets(self, dataset_id: Optional[str] = None) -> Sequence[Dataset]:
         """
@@ -176,6 +182,7 @@ class LangchainWrapper(BaseContext):
         """
         dataset_index_results = OrderedDict()
         from langchain.indexes import SQLRecordManager, index
+
         # TODO: add lockfile
 
         for dataset in self._list_datasets(dataset_id):
@@ -183,14 +190,13 @@ class LangchainWrapper(BaseContext):
                 self.console.print(f"Skipping dataset '{dataset.id}'")
                 continue
 
-            if dataset.index == 'cache':
+            if dataset.index == "cache":
                 self.write_files(dataset.id)
                 continue
 
             namespace = f"{self.project}/{dataset.name}"
             record_manager = SQLRecordManager(
-                namespace,
-                db_url=self.record_manager_db_url
+                namespace, db_url=self.record_manager_db_url
             )
 
             record_manager.create_schema()
@@ -200,7 +206,9 @@ class LangchainWrapper(BaseContext):
 
                 def with_namespace(documents: Iterator[Document]) -> Iterator[Document]:
                     for document in documents:
-                        document.metadata['namespace'] = f"{self.project}/{dataset.name}"
+                        document.metadata[
+                            "namespace"
+                        ] = f"{self.project}/{dataset.name}"
                         yield document
 
                 return index(
@@ -208,23 +216,37 @@ class LangchainWrapper(BaseContext):
                     record_manager,
                     dataset.vector_store,
                     cleanup=dataset.cleanup,
-                    source_id_key=dataset.source_id_key
+                    source_id_key=dataset.source_id_key,
                 )
 
-            return_value = self.console.status(f"Indexing '{dataset.id}' dataset using '{dataset.cleanup}' cleanup method.",
-                                               index_dataset)
-            return_value['cleanup'] = str(dataset.cleanup)
-            return_value['source_id_key'] = dataset.source_id_key
+            return_value = self.console.status(
+                f"Indexing '{dataset.id}' dataset using '{dataset.cleanup}' cleanup method.",
+                index_dataset,
+            )
+            return_value["cleanup"] = str(dataset.cleanup)
+            return_value["source_id_key"] = dataset.source_id_key
             dataset_index_results[dataset.id] = return_value
 
         self.console.print_table(
             dataset_index_results.items(),
-            ['Dataset', 'Cleanup', 'Doc added', 'Doc updated', 'Doc skipped', 'Doc deleted'],
+            [
+                "Dataset",
+                "Cleanup",
+                "Doc added",
+                "Doc updated",
+                "Doc skipped",
+                "Doc deleted",
+            ],
             lambda _, keyval: (
-                keyval[0], str(keyval[1]['cleanup']), str(keyval[1]['num_added']), str(keyval[1]['num_updated']),
-                str(keyval[1]['num_skipped']), str(keyval[1]['num_deleted'])),
+                keyval[0],
+                str(keyval[1]["cleanup"]),
+                str(keyval[1]["num_added"]),
+                str(keyval[1]["num_updated"]),
+                str(keyval[1]["num_skipped"]),
+                str(keyval[1]["num_deleted"]),
+            ),
             title="Dataset Indexing",
-            show_lines=True
+            show_lines=True,
         )
 
     def print_metadata(self, dataset_id: Optional[str] = None):
@@ -246,10 +268,14 @@ class LangchainWrapper(BaseContext):
 
             self.console.print_table(
                 metadata.items(),
-                ['Key', 'Type', 'Value'],
-                lambda index, keyval: (keyval[0], keyval[1].__class__.__name__, str(keyval[1])),
+                ["Key", "Type", "Value"],
+                lambda index, keyval: (
+                    keyval[0],
+                    keyval[1].__class__.__name__,
+                    str(keyval[1]),
+                ),
                 title=f"Metadata for {dataset.id}",
-                show_lines=True
+                show_lines=True,
             )
 
     def write_files(self, dataset_id: Optional[str] = None):
@@ -268,7 +294,13 @@ class LangchainWrapper(BaseContext):
             # TODO: create a table with number of wrote files?
             dataset.write_files(self.console)
 
-    def search_documents(self, query: str, filter: Optional[dict[str, str]] = None, for_print: bool = False, for_delete: bool = False):
+    def search_documents(
+        self,
+        query: str,
+        filter: Optional[dict[str, str]] = None,
+        for_print: bool = False,
+        for_delete: bool = False,
+    ):
         """
         Method to execute a similarity search on the vector store
         Args:
@@ -284,33 +316,43 @@ class LangchainWrapper(BaseContext):
         similarity_search_args = {}
 
         import inspect
+
         argspect = inspect.getfullargspec(self.vector_store.similarity_search)
         if filter:
-            is_filter = 'filter' in argspect.args
-            is_where = 'where' in argspect.args
+            is_filter = "filter" in argspect.args
+            is_where = "where" in argspect.args
             if not is_filter and is_where:
-                raise RuntimeError(f"Used vector store does allow to support 'filter' arguments")
-            similarity_search_args['filter' if is_filter else 'where'] = filter
+                raise RuntimeError(
+                    f"Used vector store does allow to support 'filter' arguments"
+                )
+            similarity_search_args["filter" if is_filter else "where"] = filter
 
         if not for_delete:
             documents = self.console.status(
                 "Performing similarity search",
-                lambda: self.vector_store.similarity_search(query=query, **similarity_search_args)
+                lambda: self.vector_store.similarity_search(
+                    query=query, **similarity_search_args
+                ),
             )
         else:
-            documents = self.vector_store.similarity_search(query=query, **similarity_search_args)
+            documents = self.vector_store.similarity_search(
+                query=query, **similarity_search_args
+            )
 
         console_print_table = (
-            self.console.print_table if for_print
-            else self.console.verbose_print_table
+            self.console.print_table if for_print else self.console.verbose_print_table
         )
 
         if not for_delete:
             console_print_table(
                 documents,
-                ['Index', 'Content', 'Metadata'],
-                lambda index, document: (str(index), document.page_content, json.dumps(document.metadata)),
-                title=query
+                ["Index", "Content", "Metadata"],
+                lambda index, document: (
+                    str(index),
+                    document.page_content,
+                    json.dumps(document.metadata),
+                ),
+                title=query,
             )
 
         return documents
@@ -324,7 +366,9 @@ class LangchainWrapper(BaseContext):
         datasets = self._list_datasets()
         Dataset.print_datasets(self.console, datasets, verbose_only=False)
 
-    def delete_from_namespace(self, namespace: str, documents: List[Document], dataset_id: Optional[str]) -> int:
+    def delete_from_namespace(
+        self, namespace: str, documents: List[Document], dataset_id: Optional[str]
+    ) -> int:
         """
         Delete documents inside a namespace
         Args:
@@ -336,6 +380,7 @@ class LangchainWrapper(BaseContext):
             number of deleted documents
         """
         from langchain.indexes import SQLRecordManager
+
         # TODO: add lockfile
 
         # TODO: get dataset from document schema
@@ -343,9 +388,14 @@ class LangchainWrapper(BaseContext):
         num_deleted = 0
 
         dataset = next(
-            (dataset for dataset in self._list_datasets(dataset_id) if
-             dataset.index and dataset.index != 'cache' and f"{self.project}/{dataset.name}" == namespace),
-            None
+            (
+                dataset
+                for dataset in self._list_datasets(dataset_id)
+                if dataset.index
+                and dataset.index != "cache"
+                and f"{self.project}/{dataset.name}" == namespace
+            ),
+            None,
         )
 
         if not dataset:
@@ -358,18 +408,13 @@ class LangchainWrapper(BaseContext):
         ]
 
         namespace = f"{self.project}/{dataset.name}"
-        record_manager = SQLRecordManager(
-            namespace,
-            db_url=self.record_manager_db_url
-        )
+        record_manager = SQLRecordManager(namespace, db_url=self.record_manager_db_url)
 
         record_manager.create_schema()
 
         _source_ids = cast(Sequence[str], source_ids)
 
-        uids_to_delete = record_manager.list_keys(
-            group_ids=_source_ids
-        )
+        uids_to_delete = record_manager.list_keys(group_ids=_source_ids)
         print("=============")
         print(uids_to_delete)
 
@@ -401,15 +446,19 @@ class LangchainWrapper(BaseContext):
 
             while should_search:
                 num_deleted = 0
-                documents = self.search_documents("", filter, for_print=False, for_delete=True)
+                documents = self.search_documents(
+                    "", filter, for_print=False, for_delete=True
+                )
 
                 namespace_set = set()
 
                 for doc in documents:
-                    namespace_set.add(doc.metadata.get('namespace'))
+                    namespace_set.add(doc.metadata.get("namespace"))
 
                 for namespace in namespace_set:
-                    num_deleted += self.delete_from_namespace(namespace, documents, dataset_id)
+                    num_deleted += self.delete_from_namespace(
+                        namespace, documents, dataset_id
+                    )
 
                 total_num_deleted += num_deleted
                 should_search = bool(num_deleted)
@@ -417,13 +466,10 @@ class LangchainWrapper(BaseContext):
             return total_num_deleted
 
         total_num_deleted = self.console.status("Processing delete query", delete_work)
-        
+
         self.console.print(f"{total_num_deleted} chunk(s) deleted from database")
-        
+
         return total_num_deleted
-
-
-
 
     def clear_datasets(self, dataset_id: Optional[str] = None):
         """
@@ -436,6 +482,7 @@ class LangchainWrapper(BaseContext):
         """
         dataset_index_results = OrderedDict()
         from langchain.indexes import SQLRecordManager, index
+
         # TODO: add lockfile
 
         for dataset in self._list_datasets(dataset_id):
@@ -445,8 +492,7 @@ class LangchainWrapper(BaseContext):
 
             namespace = f"{self.project}/{dataset.name}"
             record_manager = SQLRecordManager(
-                namespace,
-                db_url=self.record_manager_db_url
+                namespace, db_url=self.record_manager_db_url
             )
 
             record_manager.create_schema()
@@ -457,47 +503,57 @@ class LangchainWrapper(BaseContext):
                     record_manager,
                     self.vector_store,
                     cleanup="full",
-                    source_id_key=dataset.source_id_key
+                    source_id_key=dataset.source_id_key,
                 )
 
-            return_value = self.console.status(f"Clearing '{dataset.id}' dataset", clear_dataset)
-            return_value['cleanup'] = str(dataset.cleanup)
-            return_value['source_id_key'] = dataset.source_id_key
+            return_value = self.console.status(
+                f"Clearing '{dataset.id}' dataset", clear_dataset
+            )
+            return_value["cleanup"] = str(dataset.cleanup)
+            return_value["source_id_key"] = dataset.source_id_key
             dataset_index_results[dataset.id] = return_value
 
         self.console.print_table(
             dataset_index_results.items(),
-            ['Dataset', 'Cleanup', 'Doc added', 'Doc updated', 'Doc skipped', 'Doc deleted'],
+            [
+                "Dataset",
+                "Cleanup",
+                "Doc added",
+                "Doc updated",
+                "Doc skipped",
+                "Doc deleted",
+            ],
             lambda index, keyval: (
-            keyval[0], str(keyval[1]['cleanup']), str(keyval[1]['num_added']), str(keyval[1]['num_updated']),
-            str(keyval[1]['num_skipped']), str(keyval[1]['num_deleted'])),
+                keyval[0],
+                str(keyval[1]["cleanup"]),
+                str(keyval[1]["num_added"]),
+                str(keyval[1]["num_updated"]),
+                str(keyval[1]["num_skipped"]),
+                str(keyval[1]["num_deleted"]),
+            ),
             title="Dataset Clearing",
-            show_lines=True
+            show_lines=True,
         )
 
     def lazy_get_llm(self) -> BaseLLM:
         if not self.llm and self.llm_factory:
             self.llm = LangchainWrapper.get_instance_from_factory(
-                self,
-                DefaultFactories.LLM,
-                self.llm_factory,
-                mandatory=True)
+                self, DefaultFactories.LLM, self.llm_factory, mandatory=True
+            )
 
         return self.llm
 
     def get_chain(self, **kwargs) -> Chain:
-
         chain_args = {**self.chain_factory, **kwargs}
 
         return LangchainWrapper.get_instance_from_factory(
-            self,
-            DefaultFactories.CHAIN,
-            chain_args,
-            mandatory=True
+            self, DefaultFactories.CHAIN, chain_args, mandatory=True
         )
 
     @staticmethod
-    def get_instance_from_factory(context, default: DefaultFactories, data: FACTORY, mandatory=False):
+    def get_instance_from_factory(
+        context, default: DefaultFactories, data: FACTORY, mandatory=False
+    ):
         """
         Helper method to
         Args:
@@ -514,6 +570,8 @@ class LangchainWrapper(BaseContext):
 
         class_loader = context.loader
         default_values = default.value
-        factory = class_loader.instantiate_factory(default_values[0], default_values[1], data if data else {})
+        factory = class_loader.instantiate_factory(
+            default_values[0], default_values[1], data if data else {}
+        )
 
         return factory.build(context)

@@ -1,8 +1,7 @@
-from langchain.schema.vectorstore import VectorStore
-from langchain.vectorstores import Chroma
-
 import chromadb
 from chromadb import API
+from langchain.schema.vectorstore import VectorStore
+from langchain.vectorstores import Chroma
 
 from eurelis_kb_framework.base_factory import BaseFactory
 
@@ -18,7 +17,7 @@ class ChromaFactory(BaseFactory[VectorStore]):
         self.arguments = {}
         self.mode = "in-memory"
         self.path = None
-        self.host = 'localhost'
+        self.host = "localhost"
         self.port = 8000
 
     def set_collection_name(self, name: str):
@@ -30,7 +29,7 @@ class ChromaFactory(BaseFactory[VectorStore]):
         Returns:
 
         """
-        self.arguments['collection_name'] = name
+        self.arguments["collection_name"] = name
 
     def set_mode(self, mode: str):
         """
@@ -44,7 +43,9 @@ class ChromaFactory(BaseFactory[VectorStore]):
         name = mode.lower()
 
         if name not in ChromaFactory.ALLOWED_MODES:
-            raise ValueError(f"{name} is not an allowed mode, use one of {ChromaFactory.ALLOWED_MODES}")
+            raise ValueError(
+                f"{name} is not an allowed mode, use one of {ChromaFactory.ALLOWED_MODES}"
+            )
 
         self.mode = name
 
@@ -87,15 +88,15 @@ class ChromaFactory(BaseFactory[VectorStore]):
         Returns:
 
         """
-        if self.mode == 'in-memory':
+        if self.mode == "in-memory":
             return chromadb.Client()
-        elif self.mode == 'persistent':
+        elif self.mode == "persistent":
             if not self.path:
                 raise ValueError("please provide a path for chromadb to store its data")
 
             return chromadb.PersistentClient(self.path)
 
-        elif self.mode == 'http':
+        elif self.mode == "http":
             return chromadb.HttpClient(self.host, self.port)
 
     def build(self, context) -> VectorStore:
@@ -110,6 +111,10 @@ class ChromaFactory(BaseFactory[VectorStore]):
         """
         client = self._get_chroma_client()
 
-        context.console.verbose_print(f"Getting chroma vector store using {self.mode} client")
+        context.console.verbose_print(
+            f"Getting chroma vector store using {self.mode} client"
+        )
 
-        return Chroma(embedding_function=context.embeddings, client=client, **self.arguments)
+        return Chroma(
+            embedding_function=context.embeddings, client=client, **self.arguments
+        )

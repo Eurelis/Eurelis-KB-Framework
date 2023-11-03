@@ -1,3 +1,4 @@
+import json
 import os.path
 from pathlib import Path
 from typing import List, Iterator, Iterable, Optional
@@ -7,9 +8,6 @@ from langchain.schema import Document, BaseDocumentTransformer
 from langchain.text_splitter import TextSplitter
 
 from eurelis_kb_framework.base_factory import JSON
-from eurelis_kb_framework.class_loader import ClassLoader
-
-import json
 
 
 class Dataset(BaseLoader):
@@ -108,7 +106,6 @@ class Dataset(BaseLoader):
         self.metadata = metadata
 
     def set_index(self, index: JSON):
-
         if index is None:
             return
 
@@ -118,21 +115,25 @@ class Dataset(BaseLoader):
 
         if isinstance(index, str):
             self.index = index
-            if self.index != 'cache':
-                raise ValueError(f"Invalid 'index' parameter value in {self.id} dataset")
+            if self.index != "cache":
+                raise ValueError(
+                    f"Invalid 'index' parameter value in {self.id} dataset"
+                )
             return
 
         if not isinstance(index, dict):
             raise ValueError(f"Invalid 'index' parameter value in {self.id} dataset")
 
-        self.source_id_key = index.get('source_id_key', 'source')
-        self.name = index.get('name', self.id)
-        self.cleanup = index.get('cleanup', None)
+        self.source_id_key = index.get("source_id_key", "source")
+        self.name = index.get("name", self.id)
+        self.cleanup = index.get("cleanup", None)
         if not self.cleanup:
             self.cleanup = None
 
-        if self.cleanup is not None and self.cleanup not in {'full', 'incremental'}:
-            raise ValueError(f"Invalid 'index.cleanup' parameter in dataset {self.id}, should be either false, not set, full or incremental")
+        if self.cleanup is not None and self.cleanup not in {"full", "incremental"}:
+            raise ValueError(
+                f"Invalid 'index.cleanup' parameter in dataset {self.id}, should be either false, not set, full or incremental"
+            )
 
     @staticmethod
     def load_document_from_cache(path: str) -> Document:
@@ -147,8 +148,8 @@ class Dataset(BaseLoader):
         """
         with open(path) as json_file:
             doc_json = json.load(json_file)
-            page_content = doc_json.get('page_content')
-            metadata = doc_json.get('metadata')
+            page_content = doc_json.get("page_content")
+            metadata = doc_json.get("metadata")
 
             return Document(page_content=page_content, metadata=metadata)
 
@@ -162,8 +163,8 @@ class Dataset(BaseLoader):
 
         """
         json_doc = {
-            'page_content': document.page_content,
-            'metadata': document.metadata
+            "page_content": document.page_content,
+            "metadata": document.metadata,
         }
 
         print(document.metadata)
@@ -179,12 +180,16 @@ class Dataset(BaseLoader):
         cache_path = Path(os.path.join(self.output_folder, relative_path + ".json"))
         file_folder = Path(os.path.dirname(cache_path))
 
-        if output_folder not in cache_path.parents:  # ensure we are still in the output folder
-            raise RuntimeError(f"Path for cache file {str(cache_path)} is not inside output folder {str(output_folder)}")
+        if (
+            output_folder not in cache_path.parents
+        ):  # ensure we are still in the output folder
+            raise RuntimeError(
+                f"Path for cache file {str(cache_path)} is not inside output folder {str(output_folder)}"
+            )
 
         os.makedirs(file_folder, exist_ok=True)  # create sub folders if needed
 
-        with open(cache_path, 'w') as json_file:
+        with open(cache_path, "w") as json_file:
             json.dump(json_doc, json_file)
 
     def _lazy_load_transformer(self) -> Iterator[Document]:
@@ -264,6 +269,7 @@ class Dataset(BaseLoader):
         Returns:
 
         """
+
         def do_work():
             for document in self.lazy_load():
                 self._write_document_as_cache(document)
@@ -280,7 +286,7 @@ class Dataset(BaseLoader):
         return next(self.lazy_load())
 
     @staticmethod
-    def print_datasets(output, datasets: Iterable['Dataset'], verbose_only=False):
+    def print_datasets(output, datasets: Iterable["Dataset"], verbose_only=False):
         """
         Method to print datasets to an output
         Args:
@@ -292,15 +298,18 @@ class Dataset(BaseLoader):
 
         """
         console_print_table = (
-            output.verbose_print_table if verbose_only
-            else output.print_table
+            output.verbose_print_table if verbose_only else output.print_table
         )
 
         console_print_table(
             datasets,
-            ['ID', 'Can index?', 'Can cache?'],
-            lambda index, dataset: (dataset.id, str(dataset.index), str(bool(dataset.output_folder))),
-            title="Datasets"
+            ["ID", "Can index?", "Can cache?"],
+            lambda index, dataset: (
+                dataset.id,
+                str(dataset.index),
+                str(bool(dataset.output_folder)),
+            ),
+            title="Datasets",
         )
 
     def set_embeddings(self, embeddings):

@@ -1,4 +1,3 @@
-
 from langchain.document_loaders.base import BaseLoader
 
 from eurelis_kb_framework.base_factory import BaseFactory, ParamsDictFactory
@@ -37,17 +36,20 @@ class GenericLoaderFactory(ParamsDictFactory[BaseLoader]):
         if not self.provider:
             raise RuntimeError("GenericLoaderFactory missing 'provider' parameter")
 
-        if self.provider == 'url':
+        if self.provider == "url":
             from eurelis_kb_framework.document_loaders.url import UrlLoaderFactory
+
             return UrlLoaderFactory()
-        elif self.provider == 'fs':
+        elif self.provider == "fs":
             from eurelis_kb_framework.document_loaders.fs import FSLoaderFactory
+
             return FSLoaderFactory()
-        elif self.provider == 'list':
+        elif self.provider == "list":
             from eurelis_kb_framework.document_loaders.list import ListLoaderFactory
+
             return ListLoaderFactory()
 
-        raise RuntimeError(f'GenericEmbeddingsFactory unknown provider {self.provider}')
+        raise RuntimeError(f"GenericEmbeddingsFactory unknown provider {self.provider}")
 
     def build(self, context) -> BaseLoader:
         """

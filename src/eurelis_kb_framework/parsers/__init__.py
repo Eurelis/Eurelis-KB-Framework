@@ -1,11 +1,10 @@
 from typing import Iterator
 
 from langchain.document_loaders import Blob
+from langchain.document_loaders.base import BaseBlobParser
 from langchain.schema import Document
 
 from eurelis_kb_framework.base_factory import BaseFactory
-from langchain.document_loaders.base import BaseBlobParser
-
 from eurelis_kb_framework.dataset.dataset import Dataset
 
 

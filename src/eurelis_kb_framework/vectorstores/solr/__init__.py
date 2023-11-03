@@ -1,6 +1,5 @@
 from langchain.schema.vectorstore import VectorStore
 
-
 from eurelis_kb_framework.base_factory import BaseFactory
 
 

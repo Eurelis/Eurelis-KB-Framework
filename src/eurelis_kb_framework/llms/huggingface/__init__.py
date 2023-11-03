@@ -5,19 +5,19 @@ from eurelis_kb_framework.base_factory import ParamsDictFactory
 
 class HuggingFaceFactory(ParamsDictFactory[BaseLLM]):
     OPTIONAL_PARAMS = {
-        'batch_size',
-        'cache',
-        'metadata',
-        'model_id',
-        'model_kwargs',
-        'pipeline_kwargs',
-        'tags',
-        'verbose'
+        "batch_size",
+        "cache",
+        "metadata",
+        "model_id",
+        "model_kwargs",
+        "pipeline_kwargs",
+        "tags",
+        "verbose",
     }
 
     def __init__(self):
         super().__init__()
-        self.task = 'text-generation'
+        self.task = "text-generation"
         self.model_id = None
 
     def set_model_id(self, model_id: str):
