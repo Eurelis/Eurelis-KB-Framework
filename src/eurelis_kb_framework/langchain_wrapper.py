@@ -294,6 +294,47 @@ class LangchainWrapper(BaseContext):
             # TODO: create a table with number of wrote files?
             dataset.write_files(self.console)
 
+    def vector_search_documents(
+        self,
+        vector: List[float],
+        filter: Optional[dict[str, str]] = None,
+        include_relevance: Optional[bool] = False,
+    ):
+        """
+        Method to execute a similarity search on the vector store
+        Args:
+            vector: the query to look documents for
+            filter: filter
+            include_relevance: boolean, default
+
+        Returns:
+            list of documents
+        """
+
+        similarity_search_args = {}
+
+        import inspect
+
+        argspect = inspect.getfullargspec(self.vector_store.similarity_search)
+        if filter:
+            is_filter = "filter" in argspect.args
+            is_where = "where" in argspect.args
+            if not is_filter and is_where:
+                raise RuntimeError(
+                    f"Used vector store does allow to support 'filter' arguments"
+                )
+            similarity_search_args["filter" if is_filter else "where"] = filter
+
+        search_method = (
+            self.vector_store.similarity_search
+            if not include_relevance
+            else self.vector_store.similarity_search_by_vector_with_relevance_scores
+        )
+
+        documents = search_method(vector, **similarity_search_args)
+
+        return documents
+
     def search_documents(
         self,
         query: str,
