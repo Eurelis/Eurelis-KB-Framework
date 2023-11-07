@@ -297,6 +297,7 @@ class LangchainWrapper(BaseContext):
     def vector_search_documents(
         self,
         vector: List[float],
+        k: int = 4,
         filter: Optional[dict[str, str]] = None,
         include_relevance: Optional[bool] = False,
     ):
@@ -311,7 +312,7 @@ class LangchainWrapper(BaseContext):
             list of documents
         """
 
-        similarity_search_args = {}
+        similarity_search_args = {"k": k}
 
         import inspect
 
@@ -338,6 +339,7 @@ class LangchainWrapper(BaseContext):
     def search_documents(
         self,
         query: str,
+        k: int = 4,
         filter: Optional[dict[str, str]] = None,
         for_print: bool = False,
         for_delete: bool = False,
@@ -354,7 +356,7 @@ class LangchainWrapper(BaseContext):
             list of documents
         """
 
-        similarity_search_args = {}
+        similarity_search_args = {"k": k}
 
         import inspect
 

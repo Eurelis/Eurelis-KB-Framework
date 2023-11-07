@@ -21,7 +21,7 @@ def _parsing_function_factory(remove_list: list):
                 for node in nodes:
                     node.extract()
 
-        return content.get_text("")
+        return content.get_text("\n")
 
     return _parsing_function
 
