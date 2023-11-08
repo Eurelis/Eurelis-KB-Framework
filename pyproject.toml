@@ -9,13 +9,16 @@ authors = [
   { name="Jérôme DIAZ", email="j.diaz@eurelis.com" },
   { name="Vincent LAMBERT", email="v.lambert@eurelis.com" }
 ]
-description = "Framework to construct and exploit knowledge base. Based on Langchain under the hood."
+description = "Framework to build and manage knowledge base. Based on Langchain under the hood."
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+]
+dependencies=[
+    "python-dotenv==1.0.0",
+    "langchain==0.0.306"
 ]
 
 [project.urls]

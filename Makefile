@@ -14,7 +14,7 @@ update-venv: init-venv
 	@echo "***** $@"
 	@source .venv/bin/activate &&\
 	pip install --upgrade pip &&\
-	pip install -r src/requirements.txt
+	pip install .
 
 install-black: update-venv
 	@echo "***** $@"

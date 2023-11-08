@@ -5,3 +5,18 @@ dist
 **/.idea
 .idea
 **/__pycache__
+
+
+# Editor
+.vscode
+.idea
+
+# Python venv
+**/__pycache__
+.venv/
+.env
+.python-version
+
+# Distribution
+**/*.egg-info
+dist/
