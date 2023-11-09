@@ -41,5 +41,11 @@ class ConsoleOutputFactory(BaseFactory[BaseConsoleOutput]):
             )
 
             return VerboseConsoleOutput(rich_console)
+        if self.is_verbose is None:
+            from eurelis_kb_framework.output.logging_console_output import (
+                LoggingConsoleOutput,
+            )
+
+            return LoggingConsoleOutput(rich_console)
 
         return BaseConsoleOutput(rich_console)
