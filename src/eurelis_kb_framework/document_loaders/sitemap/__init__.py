@@ -48,9 +48,6 @@ class SitemapDocumentLoaderFactory(ParamsDictFactory[BaseLoader]):
         "restrict_to_same_domain",
     }
 
-    def __init__(self):
-        super().__init__()
-
     def build(self, context) -> BaseLoader:
         """
         Construct the sitemap document loader

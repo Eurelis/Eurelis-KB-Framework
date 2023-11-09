@@ -33,7 +33,6 @@ class ListLoader(BaseLoader):
         self.varname = varname
         self.context = context
         self.parameters = parameters
-        print("constructor")
 
     def lazy_load(
         self,
