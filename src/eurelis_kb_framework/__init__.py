@@ -1,5 +1,6 @@
 import os
 from typing import Optional
+from sys import exit
 
 from .base_factory import BaseFactory, T
 from .langchain_wrapper import LangchainWrapper
@@ -56,6 +57,12 @@ class LangchainWrapperFactory(BaseFactory[LangchainWrapper]):
         Returns:
 
         """
+        if not dirname:
+            output.print(
+                f"Base directory not provided, please use set_base_dir(...) method"
+            )
+            exit(-1)
+
         final_path = os.path.join(dirname, "config/knowledge_base.json")
 
         if path:
