@@ -57,6 +57,7 @@ class LangchainWrapperFactory(BaseFactory[LangchainWrapper]):
         Returns:
 
         """
+        dirname = dirname if dirname else os.getcwd()
         if not dirname:
             output.print(
                 f"Base directory not provided, please use set_base_dir(...) method"
