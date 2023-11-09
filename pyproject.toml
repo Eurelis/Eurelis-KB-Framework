@@ -24,7 +24,8 @@ dependencies = [
 
 [project.optional-dependencies]
 huggingface = [
-    "sentence_transformers"
+    "sentence_transformers==2.2.2",
+    "transformers==4.34.1"
 ]
 openai = [
     "openai==0.28.1"
