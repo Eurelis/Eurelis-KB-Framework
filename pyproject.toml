@@ -37,6 +37,9 @@ solr = [
 chroma = [
     "chromadb==0.4.13"
 ]
+sitemap = [
+    "lxml==4.9.3"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/Eurelis/Eurelis-KB-Framework"
