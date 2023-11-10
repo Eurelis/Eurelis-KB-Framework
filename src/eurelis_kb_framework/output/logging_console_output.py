@@ -1,4 +1,11 @@
+import inspect
+import logging
+import sys
 from typing import List
+
+
+FORMAT = "%(asctime)s - %(name)s %(levelname)s %(message)s"
+logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
 
 class LoggingConsoleOutput:
@@ -14,6 +21,16 @@ class LoggingConsoleOutput:
         """
         self.console = console
 
+    @property
+    def logger(self) -> logging.Logger:
+        return LoggingConsoleOutput._get_logger()
+
+    @staticmethod
+    def _get_logger() -> logging.Logger:
+        frame = sys._getframe(3)
+        module = inspect.getmodule(frame)
+        return logging.getLogger(module.__name__)
+
     def print(self, *args, **kwargs):
         """
         Print method, proxy for the console print method
@@ -24,7 +41,7 @@ class LoggingConsoleOutput:
         Returns:
 
         """
-        self.console.print(*args, **kwargs)
+        self.logger.info(*args, **kwargs)
 
     def verbose_print(self, *args, **kwargs):
         """
@@ -35,8 +52,7 @@ class LoggingConsoleOutput:
 
         Returns:
         """
-
-        pass
+        self.logger.debug(*args, **kwargs)
 
     def status(self, msg: str, handler):
         """
@@ -49,9 +65,11 @@ class LoggingConsoleOutput:
             the result of the handler method
 
         """
-        self.print(msg)
+        self.logger.info(f"[START] {msg}")
+        value = handler()
+        self.logger.info(f"[END] {msg}")
 
-        return handler()
+        return value
 
     def verbose_status(self, msg, handler):
         """
@@ -64,7 +82,9 @@ class LoggingConsoleOutput:
             the result of the handler method
 
         """
-        return handler()
+        self.logger.debug(f"[START] {msg}")
+        value = handler()
+        self.logger.debug(f"[END] {msg}")
 
     def print_table(self, items, columns: List[str], row_extractor, **kwargs):
         """
@@ -78,21 +98,7 @@ class LoggingConsoleOutput:
         Returns:
 
         """
-        from rich.table import Table
-
-        # prepare the table
-        table = Table(**kwargs)
-
-        # add the columns
-        for column in columns:
-            table.add_column(column)
-
-        # add the rows
-        for index, item in enumerate(items):
-            row = row_extractor(index, item)
-            table.add_row(*row)
-
-        self.console.print(table)
+        pass
 
     def verbose_print_table(self, items, columns: List[str], row_extractor, **kwargs):
         """
@@ -106,3 +112,4 @@ class LoggingConsoleOutput:
         Returns:
 
         """
+        pass

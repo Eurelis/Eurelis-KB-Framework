@@ -98,7 +98,7 @@ class LangchainWrapper(BaseContext):
             self._parse_dataset(config.get("dataset", []))
 
             self.llm_factory = config.get("llm")
-            self.chain_factory = config.get("chain")
+            self.chain_factory = config.get("chain", {})
 
             self.project = config.get("project", "knowledge_base")
             self.record_manager_db_url = config.get(
