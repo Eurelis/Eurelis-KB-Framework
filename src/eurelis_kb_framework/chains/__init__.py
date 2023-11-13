@@ -25,7 +25,7 @@ class GenericChainsFactory(BaseFactory[Chain]):
         """
         Setter for vector store kwargs
         Args:
-            kwargs: key valye arguments to get the the vector store retriever
+            kwargs: key valye arguments to get the vector store retriever
 
         Returns:
 
