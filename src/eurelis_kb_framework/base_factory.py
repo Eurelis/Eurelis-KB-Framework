@@ -22,6 +22,7 @@ class DefaultFactories(Enum):
     LLM = ("eurelis_kb_framework.llms", "GenericLLMFactory")
     CHAIN = ("eurelis_kb_framework.chains", "GenericChainsFactory")
     EMBEDDINGS = ("eurelis_kb_framework.embeddings", "GenericEmbeddingsFactory")
+    MEMORY = ("eurelis_kb_framework.memory", "GenericMemoryFactory")
 
 
 class BaseFactory(ABC, Generic[T]):
@@ -86,7 +87,7 @@ class BaseFactory(ABC, Generic[T]):
         """
 
 
-class ParamsDictFactory(BaseFactory, Generic[T]):
+class ParamsDictFactory(BaseFactory, ABC, Generic[T]):
     """
     Base factory keeping in a dict unknown params
     """
