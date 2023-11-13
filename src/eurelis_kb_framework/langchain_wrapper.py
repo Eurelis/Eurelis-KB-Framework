@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import os.path
 from abc import ABC
 from collections import OrderedDict
+from pathlib import Path
 from typing import Optional, Sequence, Union, Iterator, cast, List
 
 from langchain.chains.base import Chain
@@ -104,6 +106,17 @@ class LangchainWrapper(BaseContext):
             self.record_manager_db_url = config.get(
                 "record_manager", "sqlite:///record_manager_cache.sql"
             )
+
+            sqlite_prefix = "sqlite:///"
+
+            if "record_manager" in config and config["record_manager"].startswith(
+                sqlite_prefix
+            ):
+                sqlite_length = len(sqlite_prefix)
+                path = config["record_manager"][sqlite_length:]
+                path = path if os.path.isabs(path) else os.path.join(os.getcwd(), path)
+                file_folder = Path(os.path.dirname(path))
+                os.makedirs(file_folder, exist_ok=True)
 
     def _parse_dataset(self, datasets: Union[FACTORY, iter[FACTORY]]):
         """
