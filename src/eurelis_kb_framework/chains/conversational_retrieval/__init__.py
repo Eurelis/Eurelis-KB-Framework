@@ -28,6 +28,11 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
         self.retriever_kwargs = kwargs if kwargs else {}
 
     def set_memory(self, memory: Union[BaseMemory, FACTORY]):
+        """
+        Setter for the memory object to use
+        Args:
+            memory: instance of BaseMemory object or
+        """
         self.memory = memory
 
     def build(self, context: "LangchainWrapper") -> Chain:

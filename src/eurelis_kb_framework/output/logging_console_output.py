@@ -86,6 +86,8 @@ class LoggingConsoleOutput:
         value = handler()
         self.logger.debug(f"[END] {msg}")
 
+        return value
+
     def print_table(self, items, columns: List[str], row_extractor, **kwargs):
         """
         Print table method, will create a table and print it them

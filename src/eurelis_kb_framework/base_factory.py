@@ -28,6 +28,34 @@ class DefaultFactories(Enum):
 class BaseFactory(ABC, Generic[T]):
     """Interface for factories."""
 
+    @staticmethod
+    def _handle_param_value(raw_value: str) -> str:
+        """
+        Method to handle parameter values, will resolve environment variable values if needed
+
+        Args:
+            raw_value (str): the raw parameter value from the configuration file
+
+        Returns:
+            parameter value (str), the final value to use
+
+        Raise:
+            ValueError: If an environment variable value isn't found
+
+        """
+        if raw_value and isinstance(raw_value, str) and raw_value[0] == "$":
+            # if the value start with an $, it is assumed to be the name of an environment variable
+            # use $$ prefix to escape this mode
+            var_name = raw_value[1:]
+
+            if var_name[0] != "$":  # if it wasn't an escaped prefix
+                if var_name in os.environ:
+                    return os.environ.get(var_name)
+                else:
+                    raise ValueError(f"missing {var_name} env variable")
+
+        return raw_value
+
     def set_params(self, params: PARAMS):
         """
 
@@ -38,17 +66,8 @@ class BaseFactory(ABC, Generic[T]):
 
         """
 
-        for key, value in params.items():  # we iterate on params
-            if isinstance(value, str) and value[0] == "$":
-                # if the value start with an $, it is assumed to be the name of an environment variable
-                # use $$ prefix to escape this mode
-                var_name = value[1:]
-
-                if var_name[0] != "$":  # if it wasn't an escaped prefix
-                    if var_name in os.environ:
-                        value = os.environ.get(var_name)
-                    else:
-                        raise ValueError(f"missing {var_name} env variable")
+        for key, raw_value in params.items():  # we iterate on params
+            value = BaseFactory._handle_param_value(raw_value)
 
             function_name = f"set_{key}"  # construct the expected setter name
 
