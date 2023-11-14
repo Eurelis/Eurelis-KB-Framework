@@ -1,6 +1,6 @@
 from langchain.document_loaders.base import BaseLoader
 
-from eurelis_kb_framework.base_factory import BaseFactory, ProviderFactory
+from eurelis_kb_framework.base_factory import ProviderFactory
 
 
 class GenericLoaderFactory(ProviderFactory[BaseLoader]):

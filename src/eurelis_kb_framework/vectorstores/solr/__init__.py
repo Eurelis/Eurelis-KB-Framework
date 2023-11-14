@@ -1,12 +1,14 @@
 from langchain.schema.vectorstore import VectorStore
 
-from eurelis_kb_framework.base_factory import BaseFactory
+from eurelis_kb_framework.base_factory import ParamsDictFactory
 
 
-class SolrFactory(BaseFactory[VectorStore]):
+class SolrFactory(ParamsDictFactory[VectorStore]):
     """
     Factory to get a solr based vector store
     """
+
+    OPTIONAL_PARAMS = {"page_content_field", "vector_field", "core_name", "url_base"}
 
     def build(self, context) -> VectorStore:
         """
@@ -22,4 +24,4 @@ class SolrFactory(BaseFactory[VectorStore]):
 
         context.console.verbose_print(f"Getting solr vector store")
 
-        return Solr(context.embeddings)
+        return Solr(context.embeddings, core_kwargs=self.get_optional_params())

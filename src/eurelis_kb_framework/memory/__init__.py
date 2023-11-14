@@ -1,4 +1,3 @@
-from langchain.chains.base import Chain
 from langchain.schema import BaseMemory
 
 from eurelis_kb_framework.base_factory import ProviderFactory

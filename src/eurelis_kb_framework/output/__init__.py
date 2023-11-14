@@ -1,7 +1,20 @@
-from rich.console import Console
+import logging
+from enum import Enum
+from typing import Union, Optional
+
 
 from eurelis_kb_framework.base_factory import BaseFactory
 from eurelis_kb_framework.output.base_console_output import BaseConsoleOutput
+
+
+class Verbosity(Enum):
+    CONSOLE_INFO = "console-info"
+    CONSOLE_DEBUG = "console-debug"
+    LOG_INFO = "log-info"
+    LOG_DEBUG = "log-debug"
+
+
+VERBOSE_VALUE = Union[Optional[Union[bool]], Verbosity]
 
 
 class ConsoleOutputFactory(BaseFactory[BaseConsoleOutput]):
@@ -10,42 +23,59 @@ class ConsoleOutputFactory(BaseFactory[BaseConsoleOutput]):
     """
 
     def __init__(self):
-        self.is_verbose = False
+        self.verbosity_level: Verbosity = Verbosity.LOG_INFO
 
-    def set_verbose(self, verbose: bool):
+    def set_verbose(self, verbose: VERBOSE_VALUE):
         """
         setter for the verbose property
         Args:
-            verbose: boolean value
+            verbose (None, boolean, Verbosity): if None or True will use log_info, if False will use log_debug
 
         Returns:
 
         """
-
-        self.is_verbose = verbose
+        if verbose is None:
+            self.verbosity_level = Verbosity.LOG_INFO
+        elif isinstance(verbose, bool):
+            self.verbosity_level = (
+                Verbosity.LOG_DEBUG if verbose else Verbosity.LOG_INFO
+            )
+        elif not isinstance(verbose, Verbosity):
+            raise ValueError(
+                f"Invalid verbose parameter type, expecting None, True, False or Verbosity enum value, got {type(verbose)}"
+            )
+        else:
+            self.verbosity_level = verbose
 
     def build(self, context) -> BaseConsoleOutput:
         """
         Method to construct a BaseConsoleOutput
         Args:
-            context:
+            context: context object, usually the current instance of langchain_wrapper
 
         Returns:
-
+            instance of BaseConsoleOutput or of a class inheriting it
         """
-        rich_console = Console()
-
-        if self.is_verbose:
-            from eurelis_kb_framework.output.verbose_console_output import (
-                VerboseConsoleOutput,
-            )
-
-            return VerboseConsoleOutput(rich_console)
-        if self.is_verbose is None:
+        if self.verbosity_level == Verbosity.LOG_INFO:
             from eurelis_kb_framework.output.logging_console_output import (
                 LoggingConsoleOutput,
             )
 
-            return LoggingConsoleOutput(rich_console)
+            return LoggingConsoleOutput(logging.INFO)
+        elif self.verbosity_level == Verbosity.LOG_DEBUG:
+            from eurelis_kb_framework.output.logging_console_output import (
+                LoggingConsoleOutput,
+            )
 
-        return BaseConsoleOutput(rich_console)
+            return LoggingConsoleOutput(logging.DEBUG)
+        elif self.verbosity_level == Verbosity.CONSOLE_DEBUG:
+            from rich.console import Console
+            from eurelis_kb_framework.output.verbose_console_output import (
+                VerboseConsoleOutput,
+            )
+
+            return VerboseConsoleOutput(Console())
+
+        from rich.console import Console
+
+        return BaseConsoleOutput(Console())

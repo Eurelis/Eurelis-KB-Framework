@@ -4,22 +4,19 @@ import sys
 from typing import List
 
 
-FORMAT = "%(asctime)s - %(name)s %(levelname)s %(message)s"
-logging.basicConfig(format=FORMAT, level=logging.DEBUG)
-
-
 class LoggingConsoleOutput:
     """
     Base output class for non-verbose printing on the console
     """
 
-    def __init__(self, console):
+    def __init__(self, level: int = logging.INFO):
         """
         Constructor
         Args:
-            console: riche.console.Console instance
+            level(int): logging level, default to logging.INFO
         """
-        self.console = console
+        logging_format = "%(asctime)s - %(name)s %(levelname)s %(message)s"
+        logging.basicConfig(format=logging_format, level=level)  # NOSONAR
 
     @property
     def logger(self) -> logging.Logger:
