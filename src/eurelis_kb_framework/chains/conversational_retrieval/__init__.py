@@ -58,7 +58,6 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
             memory = context.__class__.get_instance_from_factory(
                 context, DefaultFactories.MEMORY, self.memory
             )
-        print(memory)
 
         return ConversationalRetrievalChain.from_llm(
             context.lazy_get_llm(),

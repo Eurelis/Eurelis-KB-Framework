@@ -20,3 +20,5 @@ dist
 # Distribution
 **/*.egg-info
 dist/
+
+sonar-project.properties

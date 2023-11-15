@@ -2,6 +2,7 @@ import os
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import TypeAlias, Generic, TypeVar, Collection
+from string import Template
 
 JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 PARAMS: TypeAlias = dict[str, "JSON"]
@@ -43,16 +44,15 @@ class BaseFactory(ABC, Generic[T]):
             ValueError: If an environment variable value isn't found
 
         """
-        if raw_value and isinstance(raw_value, str) and raw_value[0] == "$":
+        if raw_value and isinstance(raw_value, str) and "$" in raw_value:
             # if the value start with an $, it is assumed to be the name of an environment variable
             # use $$ prefix to escape this mode
-            var_name = raw_value[1:]
+            s = Template(raw_value)
 
-            if var_name[0] != "$":  # if it wasn't an escaped prefix
-                if var_name in os.environ:
-                    return os.environ.get(var_name)
-                else:
-                    raise ValueError(f"missing {var_name} env variable")
+            if not s.is_valid():
+                raise ValueError(f"Invalid {raw_value} pattern")
+
+            return s.substitute(os.environ)
 
         return raw_value
 
