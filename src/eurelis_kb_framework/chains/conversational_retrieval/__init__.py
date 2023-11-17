@@ -1,7 +1,10 @@
-from typing import Union
+from typing import Union, Dict, Any, List, Optional
+from uuid import UUID
 
+import langchain
+from langchain.callbacks.base import BaseCallbackManager, BaseCallbackHandler
 from langchain.chains.base import Chain
-from langchain.schema import BaseMemory
+from langchain.schema import BaseMemory, LLMResult, BaseMessage
 
 from eurelis_kb_framework.base_factory import (
     ParamsDictFactory,
