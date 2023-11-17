@@ -49,3 +49,6 @@ sitemap = [
 [tool.setuptools]
 package-dir = {"" = "src"}
 
+[project.scripts]
+kb = "eurelis_kb_framework.main:cli"
+
