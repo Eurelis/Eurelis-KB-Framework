@@ -16,6 +16,7 @@ from eurelis_kb_framework.base_factory import DefaultFactories, FACTORY
 from eurelis_kb_framework.class_loader import ClassLoader
 from eurelis_kb_framework.dataset import DatasetFactory
 from eurelis_kb_framework.dataset.dataset import Dataset
+from eurelis_kb_framework.utils import parse_param_value
 
 
 class BaseContext(ABC):
@@ -102,9 +103,9 @@ class LangchainWrapper(BaseContext):
             self.llm_factory = config.get("llm")
             self.chain_factory = config.get("chain", {})
 
-            self.project = config.get("project", "knowledge_base")
-            self.record_manager_db_url = config.get(
-                "record_manager", "sqlite:///record_manager_cache.sql"
+            self.project = parse_param_value(config.get("project", "knowledge_base"))
+            self.record_manager_db_url = parse_param_value(
+                config.get("record_manager", "sqlite:///record_manager_cache.sql")
             )
 
             sqlite_prefix = "sqlite:///"

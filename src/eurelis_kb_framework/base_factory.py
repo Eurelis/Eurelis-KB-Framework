@@ -2,7 +2,7 @@ import os
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import TypeAlias, Generic, TypeVar, Collection
-from string import Template
+from eurelis_kb_framework.utils import parse_param_value
 
 JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 PARAMS: TypeAlias = dict[str, "JSON"]
@@ -29,33 +29,6 @@ class DefaultFactories(Enum):
 class BaseFactory(ABC, Generic[T]):
     """Interface for factories."""
 
-    @staticmethod
-    def _handle_param_value(raw_value: str) -> str:
-        """
-        Method to handle parameter values, will resolve environment variable values if needed
-
-        Args:
-            raw_value (str): the raw parameter value from the configuration file
-
-        Returns:
-            parameter value (str), the final value to use
-
-        Raise:
-            ValueError: If an environment variable value isn't found
-
-        """
-        if raw_value and isinstance(raw_value, str) and "$" in raw_value:
-            # if the value start with an $, it is assumed to be the name of an environment variable
-            # use $$ prefix to escape this mode
-            s = Template(raw_value)
-
-            if not s.is_valid():
-                raise ValueError(f"Invalid {raw_value} pattern")
-
-            return s.substitute(os.environ)
-
-        return raw_value
-
     def set_params(self, params: PARAMS):
         """
 
@@ -67,7 +40,7 @@ class BaseFactory(ABC, Generic[T]):
         """
 
         for key, raw_value in params.items():  # we iterate on params
-            value = BaseFactory._handle_param_value(raw_value)
+            value = parse_param_value(raw_value)  # to resolve environment variables
 
             function_name = f"set_{key}"  # construct the expected setter name
 
