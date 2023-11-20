@@ -20,7 +20,8 @@ dependencies = [
     "python-dotenv==1.0.0",
     "langchain==0.0.306",
     "sqlalchemy==2.0.21",
-    "rich==13.4.2"
+    "rich==13.4.2",
+    "click==8.1.7"
 ]
 
 [project.optional-dependencies]
@@ -40,6 +41,9 @@ chroma = [
 sitemap = [
     "lxml==4.9.3",
     "beautifulsoup4==4.12.2"
+]
+chatbot = [
+    "gradio==3.47.1"
 ]
 
 [project.urls]
