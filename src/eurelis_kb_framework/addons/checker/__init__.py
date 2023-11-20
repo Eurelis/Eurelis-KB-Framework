@@ -33,7 +33,9 @@ class CheckInputCallback(BaseCallbackHandler):
         metadata: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Any:
-        self.messages = messages[0]
+        self.messages = messages[
+            0
+        ]  # we have only one message in the chain at a given time
 
     def on_chain_end(
         self,
@@ -43,14 +45,12 @@ class CheckInputCallback(BaseCallbackHandler):
         parent_run_id: Optional[UUID] = None,
         **kwargs: Any,
     ) -> Any:
-        print(f"on_chain_end {run_id} => {parent_run_id}   {list(outputs.keys())}")
-        if parent_run_id is None and "answer" in outputs:
+        if parent_run_id is None and "answer" in outputs:  # last chain_end
             answer = outputs.get("answer")
 
             values = self.checker.check(
                 CheckInput(self.messages, answer, self.language), self.method
             )
-            print(values)
             outputs.update({"selfcheck": values})
 
 
@@ -69,11 +69,11 @@ class CheckInput:
 class ChatChecker:
     def __init__(self, chat_model: BaseChatModel):
         self.chat_model = chat_model
-        self.samples: List[str] = []
 
-    def _produce_samples(self, messages: List[BaseMessage], samples: int = 4):
-        for _ in range(samples):
-            self.samples.append(self.chat_model(messages).content)
+    def _produce_samples(
+        self, messages: List[BaseMessage], samples: int = 4
+    ) -> list[str]:
+        return [self.chat_model(messages).content for _ in range(samples)]
 
     def check(self, input: CheckInput, method: Method = Method.NLI) -> dict[str, Any]:
         import torch
@@ -89,8 +89,7 @@ class ChatChecker:
         #    device=device
         # )  # set device to 'cuda' if GPU is available
 
-        if not self.samples:
-            self._produce_samples(input.messages)
+        samples = self._produce_samples(input.messages)
 
         sentences = input.sentences
 
@@ -98,7 +97,7 @@ class ChatChecker:
         if not method or method == Method.BERTSCORE:
             selfcheck_bertscore = SelfCheckBERTScore(rescale_with_baseline=True)
             results[Method.BERTSCORE.value] = selfcheck_bertscore.predict(
-                sentences=sentences, sampled_passages=self.samples
+                sentences=sentences, sampled_passages=samples
             )
         if not method or method == Method.NLI:
             selfcheck_nli = SelfCheckNLI(
@@ -106,7 +105,7 @@ class ChatChecker:
             )  # set device to 'cuda' if GPU is available
             results[Method.NLI.value] = selfcheck_nli.predict(
                 sentences=sentences,  # list of sentences
-                sampled_passages=self.samples,  # list of sampled passages
+                sampled_passages=samples,  # list of sampled passages
             )
         if not method or method == Method.NGRAM:
             selfcheck_ngram = SelfCheckNgram(
@@ -115,7 +114,7 @@ class ChatChecker:
             results[Method.NGRAM.value] = selfcheck_ngram.predict(
                 sentences=sentences,
                 passage=input.answer,
-                sampled_passages=self.samples,
+                sampled_passages=samples,
             )
 
         return results
