@@ -8,7 +8,7 @@ from eurelis_kb_framework.output import Verbosity
 @click.option("--verbose/--no-verbose", default=False)
 @click.option("-config", default=None)
 @click.pass_context
-def cli(ctx, obj={}, **kwargs):
+def cli(ctx, **kwargs):
     """
     Root command, will handle retrieving verbose and config options values
     Args:
@@ -34,7 +34,6 @@ def cli(ctx, obj={}, **kwargs):
 
             if "config" in kwargs and kwargs["config"]:
                 factory.set_config_path(kwargs["config"])
-            factory.set_base_dir(os.path.dirname(__file__))
 
             wrapper.instance = factory.build(None)
         return wrapper.instance
@@ -221,4 +220,8 @@ def gradio(ctx):
 if __name__ == "__main__":
     import eurelis_langchain_solr_vectorstore
 
-    cli()
+    cli(obj={})
+
+
+def main_cli():
+    cli(obj={})

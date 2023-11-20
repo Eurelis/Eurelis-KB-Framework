@@ -50,5 +50,5 @@ sitemap = [
 package-dir = {"" = "src"}
 
 [project.scripts]
-kb = "eurelis_kb_framework.main:cli"
+kbf = "eurelis_kb_framework.main:main_cli"
 
