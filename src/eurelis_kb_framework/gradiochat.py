@@ -1,9 +1,10 @@
 import json
+from typing import Optional
 
 import gradio as gr
 
 
-memory = {"documents": []}
+memory = {"documents": [], "selfcheck": None}
 
 
 def markdown_from_memory() -> str:
@@ -22,13 +23,34 @@ def markdown_from_memory() -> str:
     return result
 
 
-def define_chatbot(wrapper):
+def selfcheck_from_memory() -> Optional[dict]:
+    return memory.get("selfcheck", None)
+
+
+def define_chatbot(wrapper, selfcheck: bool = False):
     define_chatbot.chain = wrapper.get_chain()
+    if selfcheck:
+        from eurelis_kb_framework.addons.checker.chat_checker import ChatChecker
+        from eurelis_kb_framework.addons.checker.check_input_callback import (
+            CheckInputCallback,
+        )
+
+        define_chatbot.selfcheck = ChatChecker(wrapper.lazy_get_llm())
+        define_chatbot.callbacks = [
+            CheckInputCallback(define_chatbot.selfcheck, method=None, language="en")
+        ]
+    else:
+        define_chatbot.callbacks = []
+
     # define_chatbot.chain = wrapper.get_chain(retriever_kwargs={'search_kwargs': {'filter': {'article_num': "R141-38-4"}}})
     with gr.Blocks() as demo:
         with gr.Row():
             with gr.Column(scale=2):
                 chatbot = gr.Chatbot()
+
+                if selfcheck:
+                    gr.JSON(selfcheck_from_memory, every=2)
+
                 msg = gr.Textbox()
                 clear = gr.Button("Clear")
 
@@ -40,7 +62,14 @@ def define_chatbot(wrapper):
 
         def bot(history):
             memory["documents"] = []
-            chain_answer = define_chatbot.chain(history[-1][0])
+            memory["selfcheck"] = None
+            chain_answer = define_chatbot.chain(
+                history[-1][0], callbacks=define_chatbot.callbacks
+            )
+
+            if selfcheck:
+                memory["selfcheck"] = chain_answer.get("selfcheck")
+
             memory["documents"] = chain_answer.get("source_documents", [])
             # md.value = markdown_from_memory()
 

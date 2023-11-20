@@ -45,6 +45,9 @@ sitemap = [
 chatbot = [
     "gradio==3.47.1"
 ]
+selfcheck = [
+    "selfcheckgpt==0.1.4"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/Eurelis/Eurelis-KB-Framework"
