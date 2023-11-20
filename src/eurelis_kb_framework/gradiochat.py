@@ -61,8 +61,6 @@ def define_chatbot(wrapper):
         )
         clear.click(clear_lambda, None, chatbot, queue=False).then()
 
-        print(demo.children[0].children[1].children[0])
-
     demo.queue(max_size=10)
 
     return demo

@@ -211,7 +211,7 @@ def search(ctx, query, filters):
 def gradio(ctx):
     wrapper = ctx.obj["singleton"]()
 
-    import gradiochat
+    from eurelis_kb_framework import gradiochat
 
     gradiochat.define_chatbot(wrapper).launch()
 

@@ -48,15 +48,12 @@ class ListLoader(BaseLoader):
             params[self.varname] = target
 
             # TODO: instantiate factory only one time, and clear params during the loop
-            print("ici")
-            print(self.loader)
             loader_factory = self.context.loader.instantiate_factory(
                 "eurelis_kb_framework.document_loaders",
                 "GenericLoaderFactory",
                 self.loader.copy(),
             )
             loader_factory.set_params(params)
-            print(params)
 
             final_loader = loader_factory.build(self.context)
 
