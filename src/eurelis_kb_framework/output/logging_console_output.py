@@ -30,7 +30,7 @@ class LoggingConsoleOutput:
 
     def print(self, *args, **kwargs):
         """
-        Print method, proxy for the console print method
+        Print method, proxy for the logger print method
         Args:
             *args: positional arguments
             **kwargs: keyword arguments
@@ -39,6 +39,18 @@ class LoggingConsoleOutput:
 
         """
         self.logger.info(*args, **kwargs)
+
+    def critical_print(self, *args, **kwargs):
+        """
+        Critical Print method, proxy for the logger print method
+        Args:
+            *args: positional arguments
+            **kwargs: keyword arguments
+
+        Returns:
+
+        """
+        self.logger.critical(*args, **kwargs)
 
     def verbose_print(self, *args, **kwargs):
         """
@@ -53,7 +65,7 @@ class LoggingConsoleOutput:
 
     def status(self, msg: str, handler):
         """
-        Status method, proxy for the console status method
+        Status method, proxy for the logger status method
         Args:
             msg: text message to display
             handler: function or lambda without a parameter
@@ -70,7 +82,7 @@ class LoggingConsoleOutput:
 
     def verbose_status(self, msg, handler):
         """
-        Status method, proxy for the console status method, does nothing much in the base version
+        Status method, proxy for the logger status method, does nothing much in the base version
         Args:
             msg: text message to display
             handler: function or lambda without a parameter

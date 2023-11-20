@@ -59,6 +59,17 @@ class LangchainWrapper(BaseContext):
         self.llm_factory = None
         self.chain_factory = None
         self.vector_store_data = None
+        self.is_initialized = False
+
+    def ensure_initialized(self):
+        """
+        Method to ensure the wrapper is initialized
+
+        Raise:
+            ValueError if wrapper is not initialized
+        """
+        if not self.is_initialized:
+            raise ValueError("Langchain wrapper is not initialized")
 
     def set_console(self, console):
         """
@@ -93,7 +104,11 @@ class LangchainWrapper(BaseContext):
         """
 
         with open(path) as config_file:
-            config = json.load(config_file)
+            try:
+                config = json.load(config_file)
+            except json.decoder.JSONDecodeError as e:
+                self.console.critical_print(f"Error parsing config file: {e}")
+                return
 
             self._parse_embeddings(config.get("embeddings"))
             self._parse_vector_store(config.get("vectorstore"))
@@ -118,6 +133,8 @@ class LangchainWrapper(BaseContext):
                 path = path if os.path.isabs(path) else os.path.join(os.getcwd(), path)
                 file_folder = Path(os.path.dirname(path))
                 os.makedirs(file_folder, exist_ok=True)
+
+            self.is_initialized = True
 
     def _parse_dataset(self, datasets: Union[FACTORY, iter[FACTORY]]):
         """
@@ -194,6 +211,8 @@ class LangchainWrapper(BaseContext):
         Returns:
 
         """
+        self.ensure_initialized()
+
         dataset_index_results = OrderedDict()
         from langchain.indexes import SQLRecordManager, index
 
@@ -272,6 +291,8 @@ class LangchainWrapper(BaseContext):
         Returns:
 
         """
+        self.ensure_initialized()
+
         for dataset in self._list_datasets(dataset_id):
             first_doc = dataset.get_first_doc()
 
@@ -301,6 +322,8 @@ class LangchainWrapper(BaseContext):
         Returns:
 
         """
+        self.ensure_initialized()
+
         for dataset in self._list_datasets(dataset_id):
             if not dataset.output_folder:
                 self.console.print(f"No output configured for dataset '{dataset.id}'")
@@ -325,6 +348,8 @@ class LangchainWrapper(BaseContext):
         Returns:
             list of documents
         """
+
+        self.ensure_initialized()
 
         similarity_search_args = {"k": k}
 
@@ -369,6 +394,8 @@ class LangchainWrapper(BaseContext):
         Returns:
             list of documents
         """
+
+        self.ensure_initialized()
 
         similarity_search_args = {"k": k}
 
@@ -420,6 +447,9 @@ class LangchainWrapper(BaseContext):
         Returns:
 
         """
+
+        self.ensure_initialized()
+
         datasets = self._list_datasets()
         Dataset.print_datasets(self.console, datasets, verbose_only=False)
 
@@ -436,6 +466,9 @@ class LangchainWrapper(BaseContext):
         Returns:
             number of deleted documents
         """
+
+        self.ensure_initialized()
+
         from langchain.indexes import SQLRecordManager
 
         # TODO: add lockfile
@@ -472,8 +505,6 @@ class LangchainWrapper(BaseContext):
         _source_ids = cast(Sequence[str], source_ids)
 
         uids_to_delete = record_manager.list_keys(group_ids=_source_ids)
-        print("=============")
-        print(uids_to_delete)
 
         if uids_to_delete:
             # Then delete from vector store.
@@ -494,6 +525,8 @@ class LangchainWrapper(BaseContext):
         Returns:
 
         """
+        self.ensure_initialized()
+
         if not filter:
             raise ValueError(f"Missing delete filter value")
 
@@ -537,6 +570,8 @@ class LangchainWrapper(BaseContext):
         Returns:
 
         """
+        self.ensure_initialized()
+
         dataset_index_results = OrderedDict()
         from langchain.indexes import SQLRecordManager, index
 
@@ -593,6 +628,8 @@ class LangchainWrapper(BaseContext):
         )
 
     def lazy_get_llm(self) -> BaseLLM:
+        self.ensure_initialized()
+
         if not self.llm and self.llm_factory:
             self.llm = LangchainWrapper.get_instance_from_factory(
                 self, DefaultFactories.LLM, self.llm_factory, mandatory=True
@@ -601,6 +638,8 @@ class LangchainWrapper(BaseContext):
         return self.llm
 
     def get_chain(self, **kwargs) -> Chain:
+        self.ensure_initialized()
+
         chain_args = {**self.chain_factory, **kwargs}
 
         return LangchainWrapper.get_instance_from_factory(

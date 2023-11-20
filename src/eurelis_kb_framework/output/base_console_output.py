@@ -1,4 +1,5 @@
 from typing import List
+from rich.console import Console
 
 
 class BaseConsoleOutput:
@@ -6,13 +7,14 @@ class BaseConsoleOutput:
     Base output class for non-verbose printing on the console
     """
 
-    def __init__(self, console):
+    def __init__(self):
         """
         Constructor
         Args:
             console: riche.console.Console instance
         """
-        self.console = console
+        self.console = Console()
+        self.error_console = Console(stderr=True, style="bold red")
 
     def print(self, *args, **kwargs):
         """
@@ -25,6 +27,18 @@ class BaseConsoleOutput:
 
         """
         self.console.print(*args, **kwargs)
+
+    def critical_print(self, *args, **kwargs):
+        """
+        Print method, proxy for the error console print method
+        Args:
+            *args: positional arguments
+            **kwargs: keyword arguments
+
+        Returns:
+
+        """
+        self.error_console.print(*args, **kwargs)
 
     def verbose_print(self, *args, **kwargs):
         """
