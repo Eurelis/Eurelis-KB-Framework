@@ -69,13 +69,10 @@ class ConsoleOutputFactory(BaseFactory[BaseConsoleOutput]):
 
             return LoggingConsoleOutput(logging.DEBUG)
         elif self.verbosity_level == Verbosity.CONSOLE_DEBUG:
-            from rich.console import Console
             from eurelis_kb_framework.output.verbose_console_output import (
                 VerboseConsoleOutput,
             )
 
-            return VerboseConsoleOutput(Console())
+            return VerboseConsoleOutput()
 
-        from rich.console import Console
-
-        return BaseConsoleOutput(Console())
+        return BaseConsoleOutput()

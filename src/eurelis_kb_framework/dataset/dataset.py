@@ -102,7 +102,6 @@ class Dataset(BaseLoader):
         Returns:
 
         """
-        print(metadata)
         self.metadata = metadata
 
     def set_index(self, index: JSON):
