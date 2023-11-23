@@ -51,7 +51,8 @@ class LangchainWrapper(BaseContext):
         Constructor
         """
         super().__init__(ClassLoader())
-        self.datasets = OrderedDict()
+        self._datasets: Optional[OrderedDict] = None
+        self._datasets_data: Optional[Union[List[dict], dict]] = None
         self.index_fn = None
         self.project = None
         self.record_manager_db_url = None
@@ -113,7 +114,7 @@ class LangchainWrapper(BaseContext):
             self._parse_embeddings(config.get("embeddings"))
             self._parse_vector_store(config.get("vectorstore"))
 
-            self._parse_dataset(config.get("dataset", []))
+            self._datasets_data = config.get("dataset", [])
 
             self.llm_factory = config.get("llm")
             self.chain_factory = config.get("chain", {})
@@ -136,18 +137,15 @@ class LangchainWrapper(BaseContext):
 
             self.is_initialized = True
 
-    def _parse_dataset(self, datasets: Union[FACTORY, iter[FACTORY]]):
-        """
-        Parse dataset configuration
-        Args:
-            datasets: either a single dataset dict or a list of dataset dict
+    @property
+    def datasets(self):
+        if not self._datasets:
+            self._datasets = self.console.status(
+                f"Parsing datasets",
+                lambda: DatasetFactory.build_instances(self, self._datasets_data),
+            )
 
-        Returns:
-
-        """
-        if not datasets:
-            return
-        self.datasets = DatasetFactory.build_instances(self, datasets)
+        return self._datasets
 
     def _parse_embeddings(self, embeddings: FACTORY):
         """

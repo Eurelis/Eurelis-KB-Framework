@@ -175,7 +175,7 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
         return instance
 
     @staticmethod
-    def build_instances(context, data: JSON) -> OrderedDict[Dataset]:
+    def build_instances(context, data: JSON) -> OrderedDict[str, Dataset]:
         """
         Helper method to build datasets from configuration file
         Args:
@@ -186,6 +186,9 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
 
         """
         result = OrderedDict()
+
+        if not data:
+            return result
 
         dataset_data_list = [data] if isinstance(data, dict) else data
 
