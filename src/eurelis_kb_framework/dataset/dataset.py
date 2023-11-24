@@ -275,7 +275,10 @@ class Dataset(BaseLoader):
             first document of the dataset
 
         """
-        return next(self.lazy_load())
+        try:
+            return next(self.lazy_load())
+        except StopIteration:
+            return None
 
     @staticmethod
     def print_datasets(output, datasets: Iterable["Dataset"], verbose_only=False):

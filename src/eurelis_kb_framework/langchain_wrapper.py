@@ -5,7 +5,7 @@ import os.path
 from abc import ABC
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional, Sequence, Union, Iterator, cast, List
+from typing import Optional, Sequence, Union, Iterator, cast, List, Iterable
 
 from langchain.chains.base import Chain
 from langchain.indexes._api import _get_source_id_assigner
@@ -181,7 +181,7 @@ class LangchainWrapper(BaseContext):
             self, DefaultFactories.VECTORSTORE, vector_store, True
         )
 
-    def _list_datasets(self, dataset_id: Optional[str] = None) -> Sequence[Dataset]:
+    def _list_datasets(self, dataset_id: Optional[str] = None) -> Iterable[Dataset]:
         """
         Getter for the dataset objects
         Args:

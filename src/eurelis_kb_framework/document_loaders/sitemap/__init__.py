@@ -5,6 +5,17 @@ from langchain.document_loaders.base import BaseLoader
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
 
+default_header_template = {
+    "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+    # "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*"
+    # ";q=0.8",
+    # "Accept-Language": "en-US,en;q=0.5",
+    # "Referer": "https://www.google.com/",
+    # "DNT": "1",
+    # "Connection": "keep-alive",
+    # "Upgrade-Insecure-Requests": "1",
+}
+
 
 def _parsing_function_factory(remove_list: list):
     if not remove_list:
@@ -32,9 +43,9 @@ def _meta_function(meta: dict, content: Any) -> dict:
     if title := content.find("title"):
         metadata["title"] = title.get_text()
     if description := content.find("meta", attrs={"name": "description"}):
-        metadata["description"] = description.get("content", None)
+        metadata["description"] = description.get("content", "")
     if html := content.find("html"):
-        metadata["language"] = html.get("lang", None)
+        metadata["language"] = html.get("lang", "")
 
     return metadata
 
@@ -73,6 +84,7 @@ class SitemapDocumentLoaderFactory(ParamsDictFactory[BaseLoader]):
                 self.params.get("parser_remove")
             ),
             meta_function=_meta_function,
+            header_template=default_header_template.copy(),
             **parameters,
         )
 
