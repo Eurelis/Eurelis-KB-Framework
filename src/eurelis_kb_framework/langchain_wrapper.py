@@ -380,6 +380,7 @@ class LangchainWrapper(BaseContext):
         filter: Optional[dict[str, str]] = None,
         for_print: bool = False,
         for_delete: bool = False,
+        include_relevance: bool = False,
     ):
         """
         Method to execute a similarity search on the vector store
@@ -409,17 +410,19 @@ class LangchainWrapper(BaseContext):
                 )
             similarity_search_args["filter" if is_filter else "where"] = filter
 
+        search_method = (
+            self.vector_store.similarity_search
+            if not include_relevance
+            else self.vector_store.similarity_search_with_relevance_scores
+        )
+
         if not for_delete:
             documents = self.console.status(
                 "Performing similarity search",
-                lambda: self.vector_store.similarity_search(
-                    query=query, **similarity_search_args
-                ),
+                lambda: search_method(query=query, **similarity_search_args),
             )
         else:
-            documents = self.vector_store.similarity_search(
-                query=query, **similarity_search_args
-            )
+            documents = search_method(query=query, **similarity_search_args)
 
         console_print_table = (
             self.console.print_table if for_print else self.console.verbose_print_table
