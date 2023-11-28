@@ -1,6 +1,7 @@
 import json
 
 import gradio as gr
+import textwrap
 
 
 memory = {"documents": []}
@@ -10,12 +11,15 @@ def markdown_from_memory() -> str:
     documents = memory.get("documents", [])
     result = "# Sources\n"
     for document in documents:
-        result += document.page_content
+        result += textwrap.shorten(document.page_content, 200)
 
         result += "\n\n"
-        result += "```json"
-        result += json.dumps(document.metadata)
-        result += "```"
+        result += " > " + document.metadata.get("source", "")
+        result += "\n\n"
+        # result += "\n\n"
+        # result += "```json"
+        # result += json.dumps(document.metadata)
+        # result += "```"
 
         result += "\n\n---\n\n"
 
