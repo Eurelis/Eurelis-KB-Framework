@@ -5,17 +5,6 @@ from langchain.document_loaders.base import BaseLoader
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
 
-default_header_template = {
-    "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-    # "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*"
-    # ";q=0.8",
-    # "Accept-Language": "en-US,en;q=0.5",
-    # "Referer": "https://www.google.com/",
-    # "DNT": "1",
-    # "Connection": "keep-alive",
-    # "Upgrade-Insecure-Requests": "1",
-}
-
 
 def _parsing_function_factory(remove_list: list):
     if not remove_list:
@@ -70,11 +59,16 @@ class SitemapDocumentLoaderFactory(ParamsDictFactory[BaseLoader]):
             a document loader
         """
         from langchain.document_loaders.sitemap import SitemapLoader
+        from langchain.document_loaders.web_base import default_header_template
 
         web_path = self.params.get("web_path")
 
         if not web_path:
             raise ValueError("Missing required web_path parameter")
+
+        header_template = default_header_template.copy()
+        # default user agent is "EurelisKBF/0.1"
+        header_template["User-Agent"] = self.params.get("user_agent", "EurelisKBF/0.1")
 
         parameters = self.get_optional_params()
 
@@ -84,7 +78,7 @@ class SitemapDocumentLoaderFactory(ParamsDictFactory[BaseLoader]):
                 self.params.get("parser_remove")
             ),
             meta_function=_meta_function,
-            header_template=default_header_template.copy(),
+            header_template=header_template,
             **parameters,
         )
 
