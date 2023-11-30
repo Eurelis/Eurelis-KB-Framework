@@ -1,5 +1,9 @@
 from collections import OrderedDict
 
+from eurelis_kb_framework.acronyms import AcronymsTextTransformer
+from eurelis_kb_framework.acronyms.acronyms_document_transformer import (
+    AcronymsDocumentTransformer,
+)
 from eurelis_kb_framework.base_factory import (
     ParamsDictFactory,
     FACTORY,
@@ -146,6 +150,11 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
         transformer = context.__class__.get_instance_from_factory(
             context, DefaultFactories.TRANSFORMER, self.transformer_factory_data
         )
+
+        acronyms = context.acronyms
+        if acronyms:
+            transformer = AcronymsDocumentTransformer(acronyms, transformer)
+
         instance = Dataset(self.id, loader)
 
         if self.embeddings_data:

@@ -3,6 +3,7 @@ from typing import Union
 from langchain.chains.base import Chain
 from langchain.schema import BaseMemory
 
+from eurelis_kb_framework.acronyms.acronyms_chain_wrapper import AcronymsChainWrapper
 from eurelis_kb_framework.base_factory import (
     ParamsDictFactory,
     FACTORY,

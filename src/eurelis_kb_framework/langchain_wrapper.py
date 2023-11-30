@@ -12,6 +12,8 @@ from langchain.indexes._api import _get_source_id_assigner
 from langchain.llms import BaseLLM
 from langchain.schema import Document
 
+from eurelis_kb_framework.acronyms import AcronymsTextTransformer
+from eurelis_kb_framework.acronyms.acronyms_chain_wrapper import AcronymsChainWrapper
 from eurelis_kb_framework.base_factory import DefaultFactories, FACTORY
 from eurelis_kb_framework.class_loader import ClassLoader
 from eurelis_kb_framework.dataset import DatasetFactory
@@ -61,6 +63,8 @@ class LangchainWrapper(BaseContext):
         self.chain_factory = None
         self.vector_store_data = None
         self.is_initialized = False
+        self._acronyms_data = None
+        self._acronyms = None
 
     def ensure_initialized(self):
         """
@@ -115,6 +119,7 @@ class LangchainWrapper(BaseContext):
             self._parse_vector_store(config.get("vectorstore"))
 
             self._datasets_data = config.get("dataset", [])
+            self._acronyms_data = config.get("acronyms", None)
 
             self.llm_factory = config.get("llm")
             self.chain_factory = config.get("chain", {})
@@ -146,6 +151,18 @@ class LangchainWrapper(BaseContext):
             )
 
         return self._datasets
+
+    @property
+    def acronyms(self) -> Optional[AcronymsTextTransformer]:
+        if not self._acronyms_data:
+            return None
+
+        if not self._acronyms:
+            self._acronyms = LangchainWrapper.get_instance_from_factory(
+                self, DefaultFactories.ACRONYMS, self._acronyms_data, mandatory=False
+            )
+
+        return self._acronyms
 
     def _parse_embeddings(self, embeddings: FACTORY):
         """
@@ -643,9 +660,15 @@ class LangchainWrapper(BaseContext):
 
         chain_args = {**self.chain_factory, **kwargs}
 
-        return LangchainWrapper.get_instance_from_factory(
+        chain = LangchainWrapper.get_instance_from_factory(
             self, DefaultFactories.CHAIN, chain_args, mandatory=True
         )
+
+        if self.acronyms:
+            # instantiate a wrapping chain
+            return AcronymsChainWrapper(chain, self.acronyms)
+
+        return chain
 
     @staticmethod
     def get_instance_from_factory(
