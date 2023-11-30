@@ -16,10 +16,6 @@ def markdown_from_memory() -> str:
         result += "\n\n"
         result += " > " + document.metadata.get("source", "")
         result += "\n\n"
-        # result += "\n\n"
-        # result += "```json"
-        # result += json.dumps(document.metadata)
-        # result += "```"
 
         result += "\n\n---\n\n"
 
@@ -28,7 +24,7 @@ def markdown_from_memory() -> str:
 
 def define_chatbot(wrapper):
     define_chatbot.chain = wrapper.get_chain()
-    # define_chatbot.chain = wrapper.get_chain(retriever_kwargs={'search_kwargs': {'filter': {'article_num': "R141-38-4"}}})
+    # example with filter: define_chatbot.chain = wrapper.get_chain(retriever_kwargs={'search_kwargs': {'filter': {'article_num': "R141-38-4"}}})
     with gr.Blocks() as demo:
         with gr.Row():
             with gr.Column(scale=2):
@@ -37,7 +33,7 @@ def define_chatbot(wrapper):
                 clear = gr.Button("Clear")
 
             with gr.Column(scale=1):
-                md = gr.Markdown(markdown_from_memory, every=2)
+                gr.Markdown(markdown_from_memory, every=2)
 
         def user(user_message, history):
             return "", history + [[user_message, None]]
@@ -46,9 +42,7 @@ def define_chatbot(wrapper):
             memory["documents"] = []
             chain_answer = define_chatbot.chain(history[-1][0])
             memory["documents"] = chain_answer.get("source_documents", [])
-            # md.value = markdown_from_memory()
 
-            # gr.load(markdown_from_memory, None, md)
             bot_message = chain_answer["answer"]
 
             history[-1][1] = bot_message

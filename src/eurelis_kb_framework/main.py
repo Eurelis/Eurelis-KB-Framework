@@ -60,9 +60,9 @@ def dataset(ctx, **kwargs):
     ctx.obj["dataset_id"] = dataset_id
 
 
-@dataset.command()
+@dataset.command("index")
 @click.pass_context
-def index(ctx, **kwargs):
+def dataset_index(ctx, **kwargs):
     """
     Launch indexation
     Args:
@@ -76,9 +76,9 @@ def index(ctx, **kwargs):
     wrapper.index_documents(ctx.obj["dataset_id"])
 
 
-@dataset.command()
+@dataset.command("metadata")
 @click.pass_context
-def metadata(ctx, **kwargs):
+def dataset_metadata(ctx, **kwargs):
     """
     Print first doc metadata
     Args:
@@ -92,9 +92,9 @@ def metadata(ctx, **kwargs):
     wrapper.print_metadata(ctx.obj["dataset_id"])
 
 
-@dataset.command()
+@dataset.command("cache")
 @click.pass_context
-def cache(ctx, **kwargs):
+def dataset_cache(ctx, **kwargs):
     """
     Write cache files for metadata
     Args:
@@ -108,9 +108,9 @@ def cache(ctx, **kwargs):
     wrapper.write_files(ctx.obj["dataset_id"])
 
 
-@dataset.command()
+@dataset.command("ls")
 @click.pass_context
-def ls(ctx):
+def dataset_list(ctx):
     """
     List dataset
     Args:
@@ -123,9 +123,9 @@ def ls(ctx):
     wrapper.list_datasets()
 
 
-@dataset.command()
+@dataset.command("clear")
 @click.pass_context
-def clear(ctx):
+def dataset_clear(ctx):
     """
     Clear dataset
     Args:
