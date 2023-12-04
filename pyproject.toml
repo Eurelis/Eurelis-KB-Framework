@@ -21,7 +21,8 @@ dependencies = [
     "langchain==0.0.306",
     "sqlalchemy==2.0.21",
     "rich==13.4.2",
-    "click==8.1.7"
+    "click==8.1.7",
+    "numpy==1.26.0"
 ]
 
 [project.optional-dependencies]

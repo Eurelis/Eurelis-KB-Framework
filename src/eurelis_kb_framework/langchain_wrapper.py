@@ -5,8 +5,9 @@ import os.path
 from abc import ABC
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional, Sequence, Union, Iterator, cast, List, Iterable
+from typing import Optional, Sequence, Union, Iterator, cast, List, Iterable, Tuple
 
+import numpy as np
 from langchain.chains.base import Chain
 from langchain.indexes._api import _get_source_id_assigner
 from langchain.llms import BaseLLM
@@ -18,7 +19,7 @@ from eurelis_kb_framework.base_factory import DefaultFactories
 from eurelis_kb_framework.class_loader import ClassLoader
 from eurelis_kb_framework.dataset import DatasetFactory
 from eurelis_kb_framework.dataset.dataset import Dataset
-from eurelis_kb_framework.types import FACTORY
+from eurelis_kb_framework.types import FACTORY, EMBEDDING
 from eurelis_kb_framework.utils import parse_param_value
 
 
@@ -347,6 +348,136 @@ class LangchainWrapper(BaseContext):
             # TODO: create a table with number of wrote files?
             dataset.write_files(self.console)
 
+    def _build_search_args(
+        self, k: int = 4, search_filter: Optional[dict[str, str]] = None
+    ) -> dict:
+        search_args = {"k": k}
+
+        import inspect
+
+        argspect = inspect.getfullargspec(self.vector_store.similarity_search)
+        if search_filter:
+            is_filter = "filter" in argspect.args
+            is_where = "where" in argspect.args
+            if not is_filter and is_where:
+                raise RuntimeError(
+                    f"Used vector store does allow to support 'filter' arguments"
+                )
+            search_args["filter" if is_filter else "where"] = search_filter
+
+        return search_args
+
+    def metadata_search_documents(
+        self, k: int = 10, search_filter: Optional[dict[str, str]] = None
+    ) -> List[Document]:
+        """
+        Method to fetch k document using filters vector store
+        Args:
+            k: max number of documents to return
+            search_filter: filter
+
+        Returns:
+            list of documents
+        """
+
+        self.ensure_initialized()
+
+        search_args = self._build_search_args(k, search_filter)
+
+        return self.vector_store.similarity_search(query="", **search_args)
+
+    def mean_embedding_from_metadata_search_documents(
+        self, k: int = 10, search_filter: Optional[dict[str, str]] = None
+    ) -> EMBEDDING:
+        """
+        Method to fetch k document using filters vector store and compute a mean embedding
+        Args:
+            k: max number of documents to return
+            search_filter: filter
+
+        Returns:
+            embedding, list of float
+        """
+        # no need to call ensure initialized as it is performed on metadata search documents
+        documents = self.metadata_search_documents(k, search_filter)
+
+        if not documents:
+            return None
+
+        # process the embeddings
+        doc_contents = list(map(lambda doc: doc.page_content, documents))
+        embeddings = self.embeddings.embed_documents(doc_contents)
+
+        # return the values
+        return np.mean(np.array(embeddings), axis=0).tolist()
+
+    def get_embedding_associated_documents(
+        self,
+        *sources: str,
+        source_field: str = "source",
+        k: int = 4,
+        expected_docs_by_source: int = 1,
+        single_doc_by_source: bool = True,
+    ) -> List[Tuple[Document, float]]:
+        """
+        Method to get suggestions
+
+        Args:
+            *sources(str): list of sources
+            source_field(str): the metadata field to use to filter sources for
+            k(int): the expected number of documents to return
+            expected_docs_by_source(int): the expected number of documents for a given source
+            single_doc_by_source(bool): default to True, only one document for a given source in the result list
+
+        Returns:
+            list of tuples with the document and relevance score
+        """
+
+        # get the mean embedding for the sources
+        embeddings = []
+        for source in sources:
+            embedding = self.mean_embedding_from_metadata_search_documents(
+                k=expected_docs_by_source, search_filter={source_field: source}
+            )
+
+            if embedding:
+                embeddings.append(embedding)
+
+        if not embeddings:
+            return []
+
+        mean_embedding = np.mean(np.array(embeddings), axis=0).tolist()
+
+        # get the docs nearest to the mean embedding
+        k_search_documents = (
+            k + len(sources)
+        ) * expected_docs_by_source  # we ask for more documents in case we need to filter out source docments
+        search_documents = self.vector_search_documents(
+            mean_embedding, k_search_documents, include_relevance=True
+        )
+
+        # we remove from documents those corresponding to the given sources
+        documents = filter(
+            lambda item: item[0].metadata.get(source_field) not in sources,
+            search_documents,
+        )
+
+        if single_doc_by_source:
+            new_docs = []
+            source_set = set()
+
+            # ensure to have only the first document for a given source value
+            for doc in documents:
+                source = doc[0].metadata.get(source_field)
+                if source not in source_set:
+                    new_docs.append(doc)
+                    source_set.add(source)
+
+            documents = new_docs
+
+        # we truncate the return list
+        return list(documents)[:k]
+
     def vector_search_documents(
         self,
         vector: List[float],
@@ -368,19 +499,7 @@ class LangchainWrapper(BaseContext):
 
         self.ensure_initialized()
 
-        similarity_search_args = {"k": k}
-
-        import inspect
-
-        argspect = inspect.getfullargspec(self.vector_store.similarity_search)
-        if search_filter:
-            is_filter = "filter" in argspect.args
-            is_where = "where" in argspect.args
-            if not is_filter and is_where:
-                raise RuntimeError(
-                    f"Used vector store does allow to support 'filter' arguments"
-                )
-            similarity_search_args["filter" if is_filter else "where"] = search_filter
+        search_args = self._build_search_args(k, search_filter)
 
         search_method = (
             self.vector_store.similarity_search
@@ -388,7 +507,7 @@ class LangchainWrapper(BaseContext):
             else self.vector_store.similarity_search_by_vector_with_relevance_scores
         )
 
-        documents = search_method(vector, **similarity_search_args)
+        documents = search_method(vector, **search_args)
 
         return documents
 
@@ -398,7 +517,6 @@ class LangchainWrapper(BaseContext):
         k: int = 4,
         search_filter: Optional[dict[str, str]] = None,
         for_print: bool = False,
-        for_delete: bool = False,
         include_relevance: bool = False,
     ):
         """
@@ -417,19 +535,7 @@ class LangchainWrapper(BaseContext):
 
         self.ensure_initialized()
 
-        similarity_search_args = {"k": k}
-
-        import inspect
-
-        argspect = inspect.getfullargspec(self.vector_store.similarity_search)
-        if search_filter:
-            is_filter = "filter" in argspect.args
-            is_where = "where" in argspect.args
-            if not is_filter and is_where:
-                raise RuntimeError(
-                    f"Used vector store does allow to support 'filter' arguments"
-                )
-            similarity_search_args["filter" if is_filter else "where"] = search_filter
+        search_args = self._build_search_args(k, search_filter)
 
         search_method = (
             self.vector_store.similarity_search
@@ -437,29 +543,25 @@ class LangchainWrapper(BaseContext):
             else self.vector_store.similarity_search_with_relevance_scores
         )
 
-        if not for_delete:
-            documents = self.console.status(
-                "Performing similarity search",
-                lambda: search_method(query=query, **similarity_search_args),
-            )
-        else:
-            documents = search_method(query=query, **similarity_search_args)
+        documents = self.console.status(
+            "Performing similarity search",
+            lambda: search_method(query=query, **search_args),
+        )
 
         console_print_table = (
             self.console.print_table if for_print else self.console.verbose_print_table
         )
 
-        if not for_delete:
-            console_print_table(
-                documents,
-                ["Index", "Content", "Metadata"],
-                lambda index, document: (
-                    str(index),
-                    document.page_content,
-                    json.dumps(document.metadata),
-                ),
-                title=query,
-            )
+        console_print_table(
+            documents,
+            ["Index", "Content", "Metadata"],
+            lambda index, document: (
+                str(index),
+                document.page_content,
+                json.dumps(document.metadata),
+            ),
+            title=query,
+        )
 
         return documents
 
@@ -558,12 +660,9 @@ class LangchainWrapper(BaseContext):
 
             while should_search:
                 num_deleted = 0
-                documents = self.search_documents(
-                    "",
+                documents = self.metadata_search_documents(
                     k=10,
                     search_filter=search_filter,
-                    for_print=False,
-                    for_delete=True,
                 )
 
                 namespace_set = set()
