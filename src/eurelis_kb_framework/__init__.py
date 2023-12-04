@@ -1,6 +1,6 @@
 import os
-from typing import Optional
 from sys import exit
+from typing import Optional
 
 from .base_factory import BaseFactory, T
 from .langchain_wrapper import LangchainWrapper

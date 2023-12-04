@@ -1,8 +1,6 @@
-import json
-
-import gradio as gr
 import textwrap
 
+import gradio as gr
 
 memory = {"documents": []}
 

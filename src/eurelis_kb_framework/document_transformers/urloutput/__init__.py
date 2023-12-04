@@ -1,8 +1,9 @@
 from typing import Sequence, Any
+from urllib.parse import urlparse, ParseResult
 
 from langchain.schema import BaseDocumentTransformer, Document
+
 from eurelis_kb_framework.base_factory import BaseFactory
-from urllib.parse import urlparse, ParseResult
 
 
 def strip_scheme(url):

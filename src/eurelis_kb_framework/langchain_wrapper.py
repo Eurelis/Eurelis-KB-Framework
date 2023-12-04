@@ -14,10 +14,11 @@ from langchain.schema import Document
 
 from eurelis_kb_framework.acronyms import AcronymsTextTransformer
 from eurelis_kb_framework.acronyms.acronyms_chain_wrapper import AcronymsChainWrapper
-from eurelis_kb_framework.base_factory import DefaultFactories, FACTORY
+from eurelis_kb_framework.base_factory import DefaultFactories
 from eurelis_kb_framework.class_loader import ClassLoader
 from eurelis_kb_framework.dataset import DatasetFactory
 from eurelis_kb_framework.dataset.dataset import Dataset
+from eurelis_kb_framework.types import FACTORY
 from eurelis_kb_framework.utils import parse_param_value
 
 
@@ -350,14 +351,15 @@ class LangchainWrapper(BaseContext):
         self,
         vector: List[float],
         k: int = 4,
-        filter: Optional[dict[str, str]] = None,
+        search_filter: Optional[dict[str, str]] = None,
         include_relevance: Optional[bool] = False,
     ):
         """
         Method to execute a similarity search on the vector store
         Args:
             vector: the query to look documents for
-            filter: filter
+            k: max number of documents to return
+            search_filter: filter
             include_relevance: boolean, default
 
         Returns:
@@ -371,14 +373,14 @@ class LangchainWrapper(BaseContext):
         import inspect
 
         argspect = inspect.getfullargspec(self.vector_store.similarity_search)
-        if filter:
+        if search_filter:
             is_filter = "filter" in argspect.args
             is_where = "where" in argspect.args
             if not is_filter and is_where:
                 raise RuntimeError(
                     f"Used vector store does allow to support 'filter' arguments"
                 )
-            similarity_search_args["filter" if is_filter else "where"] = filter
+            similarity_search_args["filter" if is_filter else "where"] = search_filter
 
         search_method = (
             self.vector_store.similarity_search
@@ -394,7 +396,7 @@ class LangchainWrapper(BaseContext):
         self,
         query: str,
         k: int = 4,
-        filter: Optional[dict[str, str]] = None,
+        search_filter: Optional[dict[str, str]] = None,
         for_print: bool = False,
         for_delete: bool = False,
         include_relevance: bool = False,
@@ -402,10 +404,12 @@ class LangchainWrapper(BaseContext):
         """
         Method to execute a similarity search on the vector store
         Args:
-            query: the query to look documents for
-            filter: filter
-            for_print: default to False, if True method will always print result in the console
-            for_delete: default to False, if True status won't be displayed while searching
+            query (str): the query to look documents for
+            k (int): max number of documents to return
+            search_filter: filter
+            for_print (bool): default to False, if True method will always print result in the console
+            for_delete (bool): default to False, if True status won't be displayed while searching
+            include_relevance (bool): should we include relevance in results
 
         Returns:
             list of documents
@@ -418,14 +422,14 @@ class LangchainWrapper(BaseContext):
         import inspect
 
         argspect = inspect.getfullargspec(self.vector_store.similarity_search)
-        if filter:
+        if search_filter:
             is_filter = "filter" in argspect.args
             is_where = "where" in argspect.args
             if not is_filter and is_where:
                 raise RuntimeError(
                     f"Used vector store does allow to support 'filter' arguments"
                 )
-            similarity_search_args["filter" if is_filter else "where"] = filter
+            similarity_search_args["filter" if is_filter else "where"] = search_filter
 
         search_method = (
             self.vector_store.similarity_search
@@ -533,11 +537,11 @@ class LangchainWrapper(BaseContext):
 
         return num_deleted
 
-    def delete(self, filter: dict[str, str], dataset_id: Optional[str]) -> int:
+    def delete(self, search_filter: dict[str, str], dataset_id: Optional[str]) -> int:
         """
         Method to delete documents using a search query
         Args:
-            filter: filters for the search query
+            search_filter: filters for the search query
             dataset_id: optional dataset id
 
         Returns:
@@ -555,7 +559,11 @@ class LangchainWrapper(BaseContext):
             while should_search:
                 num_deleted = 0
                 documents = self.search_documents(
-                    "", filter, for_print=False, for_delete=True
+                    "",
+                    k=10,
+                    search_filter=search_filter,
+                    for_print=False,
+                    for_delete=True,
                 )
 
                 namespace_set = set()
@@ -646,6 +654,12 @@ class LangchainWrapper(BaseContext):
         )
 
     def lazy_get_llm(self) -> BaseLLM:
+        """
+        Helper method to get the LLM instance when needed
+
+        Returns:
+            BaseLLM: llm instance
+        """
         self.ensure_initialized()
 
         if not self.llm and self.llm_factory:
@@ -656,6 +670,12 @@ class LangchainWrapper(BaseContext):
         return self.llm
 
     def get_chain(self, **kwargs) -> Chain:
+        """
+        Helper method to get a langchain chain
+
+        Args:
+            kwargs: additional parameters to use on chain creation, can override default values from the json config
+        """
         self.ensure_initialized()
 
         chain_args = {**self.chain_factory, **kwargs}
@@ -665,22 +685,26 @@ class LangchainWrapper(BaseContext):
         )
 
         if self.acronyms:
-            # instantiate a wrapping chain
+            # instantiate and return a wrapping chain to handle acronyms
             return AcronymsChainWrapper(chain, self.acronyms)
 
         return chain
 
     @staticmethod
     def get_instance_from_factory(
-        context, default: DefaultFactories, data: FACTORY, mandatory=False
+        context,
+        default: DefaultFactories,
+        data: Optional[FACTORY],
+        mandatory: bool = False,
     ):
         """
         Helper method to
         Args:
-            context:
-            default:
-            data:
-            mandatory:
+            context: the context object to build the instance, usually the langchain wrapper itself
+            default: default factories enum value, contains default module and class name
+            data: factory data to provide, either a string or a dictionary
+            mandatory (bool): if False no instance is returned if no data is provided,
+                else we construct the object using only default factory values
 
         Returns:
 
@@ -688,10 +712,12 @@ class LangchainWrapper(BaseContext):
         if not mandatory and not data:
             return None
 
+        # instantiate the factory
         class_loader = context.loader
         default_values = default.value
         factory = class_loader.instantiate_factory(
             default_values[0], default_values[1], data if data else {}
         )
 
+        # use the factory to build the object
         return factory.build(context)

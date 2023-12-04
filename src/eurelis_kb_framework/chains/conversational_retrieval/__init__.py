@@ -3,15 +3,19 @@ from typing import Union
 from langchain.chains.base import Chain
 from langchain.schema import BaseMemory
 
-from eurelis_kb_framework.acronyms.acronyms_chain_wrapper import AcronymsChainWrapper
 from eurelis_kb_framework.base_factory import (
     ParamsDictFactory,
-    FACTORY,
     DefaultFactories,
 )
+from eurelis_kb_framework.types import FACTORY
 
 
 class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
+
+    """
+    Factory for the conversational retrieval chain
+    """
+
     def __init__(self):
         super().__init__()
         self.retriever_kwargs = {}
@@ -49,17 +53,23 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
         from langchain.chains import ConversationalRetrievalChain
 
         memory = None
+
+        # we check the type for the memory value
         if self.memory is None:
+            # build from default factory
             memory = context.__class__.get_instance_from_factory(
                 context, DefaultFactories.MEMORY, {}, mandatory=True
             )
         elif isinstance(self.memory, BaseMemory):
+            # use as it
             memory = self.memory
         elif isinstance(self.memory, (str, dict)):
+            # build from factory
             memory = context.__class__.get_instance_from_factory(
                 context, DefaultFactories.MEMORY, self.memory
             )
 
+        # build and return the chain
         return ConversationalRetrievalChain.from_llm(
             context.lazy_get_llm(),
             retriever=context.vector_store.as_retriever(**self.retriever_kwargs),

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import importlib
+import os
+import sys
 from types import ModuleType
-from typing import Union
 
 from eurelis_kb_framework.base_factory import BaseFactory
-
-import sys, os
+from eurelis_kb_framework.types import CLASS, FACTORY, PARAMS
 
 # hack to enable loading module from current working directory
 sys.path.append(os.getcwd())
@@ -35,7 +35,7 @@ class ClassLoader:
 
         return self.loaded_modules.get(module_name)
 
-    def instantiate_class(self, default_module_name: str, class_data: Union[str, dict]):
+    def instantiate_class(self, default_module_name: str, class_data: CLASS):
         """
         Instantiate a class
 
@@ -89,7 +89,9 @@ class ClassLoader:
 
         return class_(*args, **kwargs)
 
-    def _instantiate_class_from_dict(self, default_module_name: str, class_dict: dict):
+    def _instantiate_class_from_dict(
+        self, default_module_name: str, class_dict: PARAMS
+    ):
         """
         Instantiate a class from an object representation
         Args:
@@ -119,7 +121,7 @@ class ClassLoader:
         self,
         default_module_name: str,
         default_factory_class: str,
-        factory_data: str | dict,
+        factory_data: FACTORY,
     ) -> BaseFactory:
         """
         Instantiate a factory object
@@ -176,7 +178,7 @@ class ClassLoader:
         return class_(*args, **kwargs)
 
     def _instantiate_factory_from_dict(
-        self, default_module_name: str, default_factory_class: str, factory_dict: dict
+        self, default_module_name: str, default_factory_class: str, factory_dict: PARAMS
     ):
         """
          Instantiate a factory with its module, its name and an object representation

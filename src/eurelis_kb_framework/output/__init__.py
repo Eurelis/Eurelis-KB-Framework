@@ -2,7 +2,6 @@ import logging
 from enum import Enum
 from typing import Union, Optional
 
-
 from eurelis_kb_framework.base_factory import BaseFactory
 from eurelis_kb_framework.output.base_console_output import BaseConsoleOutput
 

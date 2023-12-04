@@ -1,4 +1,3 @@
-
 from langchain.schema.embeddings import Embeddings
 
 from eurelis_kb_framework.base_factory import BaseFactory, ParamsDictFactory
@@ -35,16 +34,20 @@ class GenericEmbeddingsFactory(ParamsDictFactory[Embeddings]):
 
         """
         if not self.provider:
-            raise RuntimeError('GenericEmbeddingsFactory missing provider parameter')
+            raise RuntimeError("GenericEmbeddingsFactory missing provider parameter")
 
-        if self.provider == 'openai':
+        if self.provider == "openai":
             from eurelis_kb_framework.embeddings.openai import OpenAIEmbeddingsFactory
+
             return OpenAIEmbeddingsFactory()
-        elif self.provider == 'huggingface':
-            from eurelis_kb_framework.embeddings.huggingface import HuggingFaceEmbeddingsFactory
+        elif self.provider == "huggingface":
+            from eurelis_kb_framework.embeddings.huggingface import (
+                HuggingFaceEmbeddingsFactory,
+            )
+
             return HuggingFaceEmbeddingsFactory()
 
-        raise RuntimeError(f'GenericEmbeddingsFactory unknown provider {self.provider}')
+        raise RuntimeError(f"GenericEmbeddingsFactory unknown provider {self.provider}")
 
     def build(self, context) -> Embeddings:
         """
@@ -57,7 +60,7 @@ class GenericEmbeddingsFactory(ParamsDictFactory[Embeddings]):
         """
         provider_factory = self._get_provider_factory()
 
-        if hasattr(context, 'console'):
+        if hasattr(context, "console"):
             context.console.verbose_print(f"Getting embeddings using {self.provider}")
 
         provider_factory.set_params(self.params)

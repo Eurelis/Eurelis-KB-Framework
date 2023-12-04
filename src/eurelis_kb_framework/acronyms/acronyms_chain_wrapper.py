@@ -25,7 +25,16 @@ class AcronymsChainWrapper(BaseConversationalRetrievalChain):
         self.proxy = chain
         self.acronyms = acronyms
 
-    def __getattr__(self, item):
+    def __getattr__(self, item: str) -> Any:
+        """
+        Method to forward every access to attribute/method non-present on AcronymsChainWrapper to the proxy instance
+
+        Args:
+            item (str): name of an attribute/method
+
+        Returns:
+            any
+        """
         return getattr(self.proxy, item)
 
     def _get_docs(
@@ -35,6 +44,7 @@ class AcronymsChainWrapper(BaseConversationalRetrievalChain):
         *args,
         run_manager: CallbackManagerForChainRun,
     ) -> List[Document]:
+        """Get docs. Will transform the query using the acronyms text transformer and then call the proxy method"""
         question = self.acronyms.transform(question)
         return self.proxy._get_docs(question, inputs, *args, run_manager=run_manager)
 
@@ -45,5 +55,6 @@ class AcronymsChainWrapper(BaseConversationalRetrievalChain):
         *,
         run_manager: AsyncCallbackManagerForChainRun,
     ) -> List[Document]:
+        """Get docs. Will transform the query using the acronyms text transformer and then call the proxy method"""
         question = self.acronyms.transform(question)
         return await self.proxy._aget_docs(question, inputs, run_manager=run_manager)

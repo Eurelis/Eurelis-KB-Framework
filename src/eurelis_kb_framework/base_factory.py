@@ -1,13 +1,9 @@
-import os
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TypeAlias, Generic, TypeVar, Collection
-from eurelis_kb_framework.utils import parse_param_value
+from typing import Generic, TypeVar, Collection
 
-JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
-PARAMS: TypeAlias = dict[str, "JSON"]
-FACTORY: TypeAlias = str | PARAMS
-CLASS: TypeAlias = str | PARAMS
+from eurelis_kb_framework.types import PARAMS, JSON
+from eurelis_kb_framework.utils import parse_param_value
 
 T = TypeVar("T")
 

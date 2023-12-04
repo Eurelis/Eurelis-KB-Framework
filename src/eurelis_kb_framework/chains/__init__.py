@@ -14,4 +14,5 @@ class GenericChainsFactory(ProviderFactory[Chain]):
 
     def __init__(self):
         super().__init__()
+        # we provide a default value for provider parameter
         self.params["provider"] = "conversational-retrieval"

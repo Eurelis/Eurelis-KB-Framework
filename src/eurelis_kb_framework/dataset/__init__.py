@@ -1,16 +1,15 @@
 from collections import OrderedDict
 
-from eurelis_kb_framework.acronyms import AcronymsTextTransformer
 from eurelis_kb_framework.acronyms.acronyms_document_transformer import (
     AcronymsDocumentTransformer,
 )
 from eurelis_kb_framework.base_factory import (
     ParamsDictFactory,
-    FACTORY,
     DefaultFactories,
     JSON,
 )
 from eurelis_kb_framework.dataset.dataset import Dataset
+from eurelis_kb_framework.types import FACTORY
 
 
 class DatasetFactory(ParamsDictFactory[Dataset]):

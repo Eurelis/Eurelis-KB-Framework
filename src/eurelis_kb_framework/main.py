@@ -1,5 +1,4 @@
 import click
-import os
 
 from eurelis_kb_framework.output import Verbosity
 
@@ -218,8 +217,6 @@ def gradio(ctx):
 
 # enable the dataset and search commands
 if __name__ == "__main__":
-    import eurelis_langchain_solr_vectorstore
-
     cli(obj={})
 
 
