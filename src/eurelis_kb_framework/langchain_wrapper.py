@@ -19,7 +19,7 @@ from eurelis_kb_framework.base_factory import DefaultFactories
 from eurelis_kb_framework.class_loader import ClassLoader
 from eurelis_kb_framework.dataset import DatasetFactory
 from eurelis_kb_framework.dataset.dataset import Dataset
-from eurelis_kb_framework.types import FACTORY, EMBEDDING
+from eurelis_kb_framework.types import FACTORY, EMBEDDING, DOCUMENT_MEAN_EMBEDDING
 from eurelis_kb_framework.utils import parse_param_value
 
 
@@ -387,13 +387,18 @@ class LangchainWrapper(BaseContext):
         return self.vector_store.similarity_search(query="", **search_args)
 
     def mean_embedding_from_metadata_search_documents(
-        self, k: int = 10, search_filter: Optional[dict[str, str]] = None
+        self,
+        k: int = 10,
+        search_filter: Optional[dict[str, str]] = None,
+        mean_embedding_method: DOCUMENT_MEAN_EMBEDDING = "default",
     ) -> EMBEDDING:
         """
         Method to fetch k document using filters vector store and compute a mean embedding
         Args:
             k: max number of documents to return
             search_filter: filter
+            mean_embedding_method: you can pass a method taking an Embeddings object and a sequence of documents
+                and returning a vector
 
         Returns:
             embedding, list of float
@@ -405,10 +410,15 @@ class LangchainWrapper(BaseContext):
             return None
 
         # process the embeddings
+
+        if callable(mean_embedding_method):
+            return mean_embedding_method(self.embeddings, documents)
+
+        # use default mean embedding
+
         doc_contents = list(map(lambda doc: doc.page_content, documents))
         embeddings = self.embeddings.embed_documents(doc_contents)
 
-        # return the values
         return np.mean(np.array(embeddings), axis=0).tolist()
 
     def get_embedding_associated_documents(
@@ -418,6 +428,7 @@ class LangchainWrapper(BaseContext):
         k: int = 4,
         expected_docs_by_source: int = 1,
         single_doc_by_source: bool = True,
+        source_mean_embedding_method: DOCUMENT_MEAN_EMBEDDING = "default",
     ) -> List[Tuple[Document, float]]:
         """
         Method to get suggestions
@@ -437,7 +448,9 @@ class LangchainWrapper(BaseContext):
         embeddings = []
         for source in sources:
             embedding = self.mean_embedding_from_metadata_search_documents(
-                k=expected_docs_by_source, search_filter={source_field: source}
+                k=expected_docs_by_source,
+                search_filter={source_field: source},
+                mean_embedding_method=source_mean_embedding_method,
             )
 
             if embedding:
