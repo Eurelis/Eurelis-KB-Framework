@@ -42,7 +42,7 @@ fast-rebuild:
 	@source .venv/bin/activate &&\
 	python -m build
 
-upload-project:
+upload-project: build-project
 	@echo "***** $@"
 	@source .venv/bin/activate &&\
 	pip install --upgrade twine &&\
