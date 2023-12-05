@@ -31,7 +31,6 @@ class PdfFileParser(BaseBlobParser):
         metadata = {
             "source": str(os.path.relpath(blob.path, self._base_path)),
         }
-        print(metadata)
 
         pdf_file = PdfReader(blob.path)
 
