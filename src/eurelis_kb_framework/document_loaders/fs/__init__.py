@@ -1,6 +1,7 @@
 from langchain.document_loaders.base import BaseLoader
 
-from eurelis_kb_framework.base_factory import ParamsDictFactory, FACTORY
+from eurelis_kb_framework.base_factory import ParamsDictFactory
+from eurelis_kb_framework.types import FACTORY
 
 
 class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
@@ -51,10 +52,17 @@ class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
 
         """
         if self.parser_data and self.parser_data != "default":
+            if isinstance(self.parser_data, str):
+                parser_data = {"factory": self.parser_data}
+            else:
+                parser_data = self.parser_data.copy()
+
+            parser_data.update({"path": self.path})
+
             parser = context.loader.instantiate_factory(
                 "eurelis_kb_framework.parsers",
                 "GenericBlobParserFactory",
-                self.parser_data,
+                parser_data,
             )
             arguments["parser"] = parser.build(context)
 

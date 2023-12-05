@@ -46,6 +46,10 @@ sitemap = [
 chatbot = [
     "gradio==3.47.1"
 ]
+pdf = [
+    "pypdf==3.16.4",
+    "cryptography==3.1"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/Eurelis/Eurelis-KB-Framework"
