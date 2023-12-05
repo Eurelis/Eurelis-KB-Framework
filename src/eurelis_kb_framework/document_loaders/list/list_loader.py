@@ -1,4 +1,4 @@
-from typing import Iterable, List, Iterator
+from typing import List, Iterator, Sequence
 
 from langchain.document_loaders.base import BaseLoader
 from langchain.schema import Document
@@ -13,7 +13,7 @@ class ListLoader(BaseLoader):
 
     def __init__(
         self,
-        targets: Iterable[str],
+        targets: Sequence[str],
         loader: BaseFactory[BaseLoader],
         varname: str,
         parameters: dict,
@@ -22,10 +22,10 @@ class ListLoader(BaseLoader):
         """
         Constructor
         Args:
-            targets: list of targets (strings)
-            loader: parameter to get the under the hood loader factory
-            varname: name of the parameter on a under the hood to use as target
-            parameters: parameters for the under the hood loader factory
+            targets (Sequence[str]: list of targets (strings)
+            loader (BaseFactory[BaseLoader]): parameter to get the under the hood loader factory
+            varname (str): name of the parameter on the sub-factory to provide target value with
+            parameters (dict): parameters for the under the hood loader factory
             context: the context object, usually the current langchain wrapper instance
         """
         self.loader = loader

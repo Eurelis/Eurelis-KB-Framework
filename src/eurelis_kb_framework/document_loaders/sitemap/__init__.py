@@ -29,11 +29,15 @@ def _parsing_function_factory(remove_list: list):
 def _meta_function(meta: dict, content: Any) -> dict:
     metadata = {"source": meta["loc"], **meta}
 
-    if title := content.find("title"):
+    title = content.find("title")
+    description = content.find("meta", attrs={"name": "description"})
+    html = content.find("html")
+
+    if title:
         metadata["title"] = title.get_text()
-    if description := content.find("meta", attrs={"name": "description"}):
+    if description:
         metadata["description"] = description.get("content", "")
-    if html := content.find("html"):
+    if html:
         metadata["language"] = html.get("lang", "")
 
     return metadata
@@ -84,7 +88,7 @@ class SitemapDocumentLoaderFactory(ParamsDictFactory[BaseLoader]):
 
         # hack as SitemapLoader does not override lazy_load from WebBaseLoader, we will force
         # the dataset to use the load method instead
-        def lazy_load(self):
+        def lazy_load(instance):
             raise NotImplementedError("")
 
         loader.lazy_load = types.MethodType(lazy_load, loader)

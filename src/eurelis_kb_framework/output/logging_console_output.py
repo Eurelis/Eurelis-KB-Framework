@@ -3,8 +3,10 @@ import logging
 import sys
 from typing import List
 
+from eurelis_kb_framework.output.output import Output
 
-class LoggingConsoleOutput:
+
+class LoggingConsoleOutput(Output):
     """
     Base output class for non-verbose printing on the console
     """

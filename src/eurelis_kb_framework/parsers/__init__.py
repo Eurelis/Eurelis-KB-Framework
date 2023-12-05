@@ -19,7 +19,7 @@ class DocumentCacheParser(BaseBlobParser):
         Args:
             blob: file blob representation
 
-        Returns:
+        Yields:
             an iterator over documents
         """
         yield Dataset.load_document_from_cache(blob.path)

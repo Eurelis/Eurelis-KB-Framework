@@ -4,6 +4,7 @@ from typing import Union, Optional
 
 from eurelis_kb_framework.base_factory import BaseFactory
 from eurelis_kb_framework.output.base_console_output import BaseConsoleOutput
+from eurelis_kb_framework.output.output import Output
 
 
 class Verbosity(Enum):
@@ -16,7 +17,7 @@ class Verbosity(Enum):
 VERBOSE_VALUE = Union[Optional[Union[bool]], Verbosity]
 
 
-class ConsoleOutputFactory(BaseFactory[BaseConsoleOutput]):
+class OutputFactory(BaseFactory[Output]):
     """
     Console output factory
     """
@@ -46,7 +47,7 @@ class ConsoleOutputFactory(BaseFactory[BaseConsoleOutput]):
         else:
             self.verbosity_level = verbose
 
-    def build(self, context) -> BaseConsoleOutput:
+    def build(self, context) -> Output:
         """
         Method to construct a BaseConsoleOutput
         Args:

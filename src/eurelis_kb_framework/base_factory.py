@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Generic, TypeVar, Collection
+from typing import Generic, TypeVar, Collection, TYPE_CHECKING, cast
 
 from eurelis_kb_framework.types import PARAMS, JSON
 from eurelis_kb_framework.utils import parse_param_value
 
 T = TypeVar("T")
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class DefaultFactories(Enum):
@@ -175,8 +178,8 @@ class ProviderFactory(ParamsDictFactory, Generic[T]):
         elif isinstance(
             provider_class, str
         ):  # the associated value in the dictionary is a string
-            return context.loader.instantiate_class(
-                "", provider_class
+            return cast(
+                BaseFactory[T], context.loader.instantiate_class("", provider_class)
             )  # we use the class loader to instantiate it, no default module name
 
     def build(self, context: "BaseContext") -> T:

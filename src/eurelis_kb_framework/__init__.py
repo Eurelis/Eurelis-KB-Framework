@@ -46,15 +46,17 @@ class LangchainWrapperFactory(BaseFactory[LangchainWrapper]):
         self.base_dir = base_dir
 
     @staticmethod
-    def get_config_final_path(output, dirname, path: Optional[str]):
+    def get_config_final_path(output, dirname, path: Optional[str]) -> str:
         """
         Helper method to determine configuration file path
         Args:
             output: object to print to the console
             dirname: base directory to look the configuration from
-            path: optional, if not set we will look for the configuration from dirname + config/knowledge_base.json, can be absolute
+            path: optional, if not set we will look for the configuration from dirname + config/knowledge_base.json,
+                can be absolute
 
         Returns:
+            str: the absolute path of the configuration file
 
         """
         dirname = dirname if dirname else os.getcwd()
@@ -102,22 +104,22 @@ class LangchainWrapperFactory(BaseFactory[LangchainWrapper]):
 
         """
 
-        from eurelis_kb_framework.output import ConsoleOutputFactory
+        from eurelis_kb_framework.output import OutputFactory
         from eurelis_kb_framework.langchain_wrapper import LangchainWrapper
 
-        console_output_factory = ConsoleOutputFactory()
-        console_output_factory.set_verbose(self.verbose)
-        console_output = console_output_factory.build(context)
+        output_factory = OutputFactory()
+        output_factory.set_verbose(self.verbose)
+        output = output_factory.build(context)
 
         final_path = LangchainWrapperFactory.get_config_final_path(
-            console_output, self.base_dir, self.config_path
+            output, self.base_dir, self.config_path
         )
 
-        console_output.print(f"Preparing langchain wrapper")
+        output.print(f"Preparing langchain wrapper")
         wrapper = LangchainWrapper()
-        wrapper.set_console(console_output)
+        wrapper.set_output(output)
 
-        console_output.status(
+        output.status(
             f"Reading configuration from {str(final_path)}",
             lambda: wrapper.load_config(final_path),
         )

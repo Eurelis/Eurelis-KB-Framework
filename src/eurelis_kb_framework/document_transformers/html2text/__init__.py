@@ -9,8 +9,8 @@ class Html2TextTransformerFactory(BaseFactory[BaseDocumentTransformer]):
     """
 
     def build(self, context) -> BaseDocumentTransformer:
-        """
-        Construct the Html2textTransformer
+        """Construct the Html2textTransformer
+
         Args:
             context: the context object, usually the current langchain wrapper instance
 

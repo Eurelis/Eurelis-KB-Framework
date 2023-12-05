@@ -18,8 +18,10 @@ def batched(iterable, n):
     if n < 1:
         raise ValueError("n must be at least one")
     it = iter(iterable)
-    while batch := tuple(islice(it, n)):
+    batch = tuple(islice(it, n))
+    while batch:
         yield batch
+        batch = tuple(islice(it, n))
 
 
 def parse_param_value(raw_value: str) -> str:

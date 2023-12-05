@@ -2,8 +2,10 @@ from typing import List
 
 from rich.console import Console
 
+from eurelis_kb_framework.output.output import Output
 
-class BaseConsoleOutput:
+
+class BaseConsoleOutput(Output):
     """
     Base output class for non-verbose printing on the console
     """

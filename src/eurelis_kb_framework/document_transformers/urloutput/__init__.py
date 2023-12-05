@@ -6,28 +6,69 @@ from langchain.schema import BaseDocumentTransformer, Document
 from eurelis_kb_framework.base_factory import BaseFactory
 
 
-def strip_scheme(url):
+def _strip_scheme(url: str) -> str:
+    """Function to remove the scheme from an url
+
+    Parse an url then return it removing its scheme and leading "/" characcters
+    ie: https://apple.com => //apple.com => apple.com
+
+    Args:
+        url (str): an url as a string
+
+    Returns:
+        str: the url without its scheme
+
+    """
     # https://stackoverflow.com/questions/21687408/how-to-remove-scheme-from-url-in-python
-    parsed_result = urlparse(url)
-    return ParseResult("", *parsed_result[1:]).geturl()
+    parsed_result = urlparse(url)  # https://apple.com
+    without_scheme = ParseResult("", *parsed_result[1:]).geturl()  # //apple.com
+
+    return without_scheme.strip("/")  # apple.com
 
 
 class UrlOutputTransformer(BaseDocumentTransformer):
+    def __init__(
+        self, url_source_field: str = "source", path_output_field: str = "source_output"
+    ):
+        self._url_source_field = url_source_field
+        self._path_output_field = path_output_field
+
     def transform_documents(
         self, documents: Sequence[Document], **kwargs: Any
     ) -> Sequence[Document]:
+        """Add a new metadata field containing a relative path given a source url.
+
+        This method will extract the url from the document metadata, then remove its scheme and add it back to metadata
+        in a new field.
+
+        Args:
+            documents: A sequence of documents to be transformed.
+            **kwargs: Arbitrary keyword arguments.
+
+        Yields:
+            Sequence[Document]: sequence of transformed documents
+
+        """
+
         for doc in documents:
-            source = doc.metadata.get("source")
-            stripped_source = strip_scheme(source)  # remove leading https/http/ftp...
-            doc.metadata["source_output"] = stripped_source.strip(
-                "/"
-            )  # remove leading /
+            source_url = doc.metadata.get(self._url_source_field)
+            doc.metadata[self._path_output_field] = _strip_scheme(
+                source_url
+            )  # remove leading https/http/ftp...
 
             yield doc
 
     async def atransform_documents(
         self, documents: Sequence[Document], **kwargs: Any
     ) -> Sequence[Document]:
+        """Asynchronously add a new metadata field containing a relative path given a source url.
+
+        This method isn't implemented
+
+        Raises:
+            NotImplementedError
+        """
+
         raise NotImplementedError
 
 

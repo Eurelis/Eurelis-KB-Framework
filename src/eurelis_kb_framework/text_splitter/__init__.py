@@ -1,3 +1,5 @@
+from typing import Tuple, cast
+
 from langchain.text_splitter import TextSplitter
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory, PARAMS
@@ -72,10 +74,10 @@ class GenericTextSplitterFactory(ParamsDictFactory[TextSplitter]):
         self.provider = None
 
     def set_provider(self, provider: str):
-        """
-        Setter for the provider to use
+        """Setter for the provider to use
+
         Args:
-            provider: name of the provider to use
+            provider (str): name of the provider to use
 
         Returns:
 
@@ -87,11 +89,11 @@ class GenericTextSplitterFactory(ParamsDictFactory[TextSplitter]):
                 f"Invalid text splitter {provider} provider, use one of {TEXT_SPLITTER_ALLOWED_TYPES.keys()}"
             )
 
-    def _extract_arguments(self) -> PARAMS:
-        """
-        Helper method to extract arguments for the given provider
+    def _extract_arguments(self) -> Tuple[str, PARAMS]:
+        """Helper method to extract arguments for the given provider
+
         Returns:
-            params for the given provider
+            Tuple[str, params]: provider name, params for the given provider
 
         """
         if not self.provider:
@@ -99,8 +101,10 @@ class GenericTextSplitterFactory(ParamsDictFactory[TextSplitter]):
 
         provider_data = TEXT_SPLITTER_ALLOWED_TYPES.get(self.provider)
 
+        provider_data_set: set[str] = cast(set[str], provider_data[1])
+
         splitter_arguments = self.extract_params(
-            provider_data[1] | TEXT_SPLITTER_ALLOWED_PARAMS
+            provider_data_set | TEXT_SPLITTER_ALLOWED_PARAMS
         )
 
         return provider_data[0], splitter_arguments
@@ -121,6 +125,9 @@ class GenericTextSplitterFactory(ParamsDictFactory[TextSplitter]):
 
         instantiate_params = {"class": class_name, "kwargs": arguments}
 
-        return context.loader.instantiate_class(
-            "langchain.text_splitter", instantiate_params
+        return cast(
+            TextSplitter,
+            context.loader.instantiate_class(
+                "langchain.text_splitter", instantiate_params
+            ),
         )

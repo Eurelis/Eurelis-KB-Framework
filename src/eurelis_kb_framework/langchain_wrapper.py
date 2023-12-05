@@ -10,7 +10,7 @@ from typing import Optional, Sequence, Union, Iterator, cast, List, Iterable, Tu
 import numpy as np
 from langchain.chains.base import Chain
 from langchain.indexes._api import _get_source_id_assigner
-from langchain.llms import BaseLLM
+from langchain.llms.base import BaseLLM
 from langchain.schema import Document
 
 from eurelis_kb_framework.acronyms import AcronymsTextTransformer
@@ -78,7 +78,7 @@ class LangchainWrapper(BaseContext):
         if not self.is_initialized:
             raise ValueError("Langchain wrapper is not initialized")
 
-    def set_console(self, console):
+    def set_output(self, console):
         """
         Setter for console
         Args:
@@ -391,7 +391,7 @@ class LangchainWrapper(BaseContext):
         k: int = 10,
         search_filter: Optional[dict[str, str]] = None,
         mean_embedding_method: DOCUMENT_MEAN_EMBEDDING = "default",
-    ) -> EMBEDDING:
+    ) -> Optional[EMBEDDING]:
         """
         Method to fetch k document using filters vector store and compute a mean embedding
         Args:
@@ -439,6 +439,7 @@ class LangchainWrapper(BaseContext):
             k(int): the expected number of documents to return
             expected_docs_by_source(int): the expected number of documents for a given source
             single_doc_by_source(bool): default to True, only one document for a given source in the result list
+            source_mean_embedding_method: to specify a callable to compute mean embedding for a document sequence
 
         Returns:
             list of tuples with the document and relevance score
@@ -539,7 +540,6 @@ class LangchainWrapper(BaseContext):
             k (int): max number of documents to return
             search_filter: filter
             for_print (bool): default to False, if True method will always print result in the console
-            for_delete (bool): default to False, if True status won't be displayed while searching
             include_relevance (bool): should we include relevance in results
 
         Returns:
@@ -693,11 +693,11 @@ class LangchainWrapper(BaseContext):
 
             return total_num_deleted
 
-        total_num_deleted = self.console.status("Processing delete query", delete_work)
+        final_num_deleted = self.console.status("Processing delete query", delete_work)
 
-        self.console.print(f"{total_num_deleted} chunk(s) deleted from database")
+        self.console.print(f"{final_num_deleted} chunk(s) deleted from database")
 
-        return total_num_deleted
+        return final_num_deleted
 
     def clear_datasets(self, dataset_id: Optional[str] = None):
         """
@@ -753,7 +753,7 @@ class LangchainWrapper(BaseContext):
                 "Doc skipped",
                 "Doc deleted",
             ],
-            lambda index, keyval: (
+            lambda _index, keyval: (
                 keyval[0],
                 str(keyval[1]["cleanup"]),
                 str(keyval[1]["num_added"]),

@@ -1,4 +1,4 @@
-from langchain.llms import BaseLLM
+from langchain.llms.base import BaseLLM
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
 

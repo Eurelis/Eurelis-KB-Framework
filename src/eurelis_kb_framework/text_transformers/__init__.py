@@ -7,11 +7,11 @@ class TextTransformer(ABC):
     """
 
     @abstractmethod
-    def transform(self, input: str) -> str:
-        """
+    def transform(self, text: str) -> str:
+        """Method to transform a text.
 
         Args:
-            input: text input
+            text (str): The text to transform.
 
         Returns:
             str, transformed text
