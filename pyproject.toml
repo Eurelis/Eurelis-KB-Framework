@@ -48,7 +48,10 @@ chatbot = [
 ]
 pdf = [
     "pypdf==3.16.4",
-    "cryptography==3.1"
+    "cryptography==41.0.7"
+]
+selfcheck = [
+    "lark==1.1.8"
 ]
 
 [project.urls]

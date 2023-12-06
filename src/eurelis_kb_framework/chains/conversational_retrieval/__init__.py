@@ -21,17 +21,6 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
         self.retriever_kwargs = {}
         self.memory = None
 
-    def set_retriever_kwargs(self, kwargs: dict):
-        """
-        Setter for vector store kwargs
-        Args:
-            kwargs: key value arguments to get the vector store retriever
-
-        Returns:
-
-        """
-        self.retriever_kwargs = kwargs if kwargs else {}
-
     def set_memory(self, memory: Union[BaseMemory, FACTORY]):
         """
         Setter for the memory object to use
@@ -69,10 +58,17 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
                 context, DefaultFactories.MEMORY, self.memory
             )
 
+        retriever = context.__class__.get_instance_from_factory(
+            context,
+            DefaultFactories.RETRIEVER,
+            self.params.get("retriever", dict()),
+            mandatory=True,
+        )
+
         # build and return the chain
         return ConversationalRetrievalChain.from_llm(
             context.lazy_get_llm(),
-            retriever=context.vector_store.as_retriever(**self.retriever_kwargs),
+            retriever=retriever,
             return_source_documents=True,
             memory=memory,
         )

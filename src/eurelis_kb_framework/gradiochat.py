@@ -14,6 +14,7 @@ def markdown_from_memory() -> str:
         result += "\n\n"
         result += " > " + document.metadata.get("source", "")
         result += "\n\n"
+        result += f"```{document.metadata}```\n\n"
 
         result += "\n\n---\n\n"
 

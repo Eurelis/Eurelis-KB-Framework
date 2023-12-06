@@ -24,6 +24,7 @@ class DefaultFactories(Enum):
     EMBEDDINGS = ("eurelis_kb_framework.embeddings", "GenericEmbeddingsFactory")
     MEMORY = ("eurelis_kb_framework.memory", "GenericMemoryFactory")
     ACRONYMS = ("eurelis_kb_framework.acronyms", "AcronymsTextTransformerFactory")
+    RETRIEVER = ("eurelis_kb_framework.retrievers", "GenericRetrieverFactory")
 
 
 class BaseFactory(ABC, Generic[T]):
