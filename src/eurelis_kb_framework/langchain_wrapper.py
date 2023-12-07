@@ -590,7 +590,7 @@ class LangchainWrapper(BaseContext):
         datasets = self._list_datasets()
         Dataset.print_datasets(self.console, datasets, verbose_only=False)
 
-    def delete_from_namespace(
+    def _delete_from_namespace(
         self, namespace: str, documents: List[Document], dataset_id: Optional[str]
     ) -> int:
         """
@@ -684,7 +684,7 @@ class LangchainWrapper(BaseContext):
                     namespace_set.add(doc.metadata.get("namespace"))
 
                 for namespace in namespace_set:
-                    num_deleted += self.delete_from_namespace(
+                    num_deleted += self._delete_from_namespace(
                         namespace, documents, dataset_id
                     )
 

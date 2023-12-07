@@ -202,7 +202,7 @@ def search(ctx, query, filters):
         filter_args = None
 
     wrapper = ctx.obj["singleton"]()
-    wrapper.search_documents(query, for_print=True, filter=filter_args)
+    wrapper.search_documents(query, for_print=True, search_filter=filter_args)
 
 
 @cli.command()
