@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Optional, Sequence, Union, Iterator, cast, List, Iterable, Tuple
 
 import numpy as np
+from bson import ObjectId
 from langchain.chains.base import Chain
 from langchain.indexes._api import _get_source_id_assigner
 from langchain.llms.base import BaseLLM
@@ -22,6 +23,13 @@ from eurelis_kb_framework.dataset import DatasetFactory
 from eurelis_kb_framework.dataset.dataset import Dataset
 from eurelis_kb_framework.types import FACTORY, EMBEDDING, DOCUMENT_MEAN_EMBEDDING
 from eurelis_kb_framework.utils import parse_param_value, batched
+
+
+class MetadataEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, ObjectId):
+            return str(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 class BaseContext(ABC):
@@ -592,7 +600,7 @@ class LangchainWrapper(BaseContext):
             lambda index, document: (
                 str(index),
                 document.page_content,
-                json.dumps(document.metadata),
+                json.dumps(document.metadata, cls=MetadataEncoder),
             ),
             title=query,
         )
