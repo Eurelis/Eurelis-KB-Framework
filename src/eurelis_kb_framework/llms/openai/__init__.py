@@ -1,6 +1,11 @@
+from typing import TYPE_CHECKING
+
 from langchain.llms.base import BaseLLM
 
 from eurelis_kb_framework.base_factory import ProviderFactory, ParamsDictFactory
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class ChatOpenAIFactory(ParamsDictFactory[BaseLLM]):
@@ -24,7 +29,7 @@ class ChatOpenAIFactory(ParamsDictFactory[BaseLLM]):
         "verbose",
     }
 
-    def build(self, context) -> BaseLLM:
+    def build(self, context: "BaseContext") -> BaseLLM:
         from langchain.chat_models import ChatOpenAI
 
         arguments = self.get_optional_params()
@@ -61,7 +66,7 @@ class OpenAIFactory(ParamsDictFactory[BaseLLM]):
         "verbose",
     }
 
-    def build(self, context) -> BaseLLM:
+    def build(self, context: "BaseContext") -> BaseLLM:
         from langchain.llms import OpenAI
 
         arguments = self.get_optional_params()

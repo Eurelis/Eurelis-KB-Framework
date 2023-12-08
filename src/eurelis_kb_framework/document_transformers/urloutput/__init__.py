@@ -1,9 +1,12 @@
-from typing import Sequence, Any
+from typing import Sequence, Any, TYPE_CHECKING
 from urllib.parse import urlparse, ParseResult
 
 from langchain.schema import BaseDocumentTransformer, Document
 
 from eurelis_kb_framework.base_factory import BaseFactory
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 def _strip_scheme(url: str) -> str:
@@ -83,7 +86,7 @@ class UrlOutputTransformerFactory(BaseFactory[BaseDocumentTransformer]):
     It is mostly used for caching
     """
 
-    def build(self, context) -> BaseDocumentTransformer:
+    def build(self, context: "BaseContext") -> BaseDocumentTransformer:
         """
         Construct the UrlOutputTransformer
         Args:

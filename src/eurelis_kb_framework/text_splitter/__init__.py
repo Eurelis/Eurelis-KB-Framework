@@ -1,8 +1,11 @@
-from typing import Tuple, cast
+from typing import Tuple, cast, TYPE_CHECKING
 
 from langchain.text_splitter import TextSplitter
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory, PARAMS
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 TEXT_SPLITTER_ALLOWED_PARAMS = {
     "chunk_size",
@@ -109,7 +112,7 @@ class GenericTextSplitterFactory(ParamsDictFactory[TextSplitter]):
 
         return provider_data[0], splitter_arguments
 
-    def build(self, context) -> TextSplitter:
+    def build(self, context: "BaseContext") -> TextSplitter:
         """
         Method to get the TextSplitter from
         Args:

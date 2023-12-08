@@ -1,9 +1,12 @@
 import os
 from sys import exit
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from .base_factory import BaseFactory, T
 from .langchain_wrapper import LangchainWrapper
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class LangchainWrapperFactory(BaseFactory[LangchainWrapper]):
@@ -93,7 +96,7 @@ class LangchainWrapperFactory(BaseFactory[LangchainWrapper]):
 
         return final_path
 
-    def build(self, context) -> LangchainWrapper:
+    def build(self, context: "BaseContext") -> LangchainWrapper:
         """
         Method to build the langchain wrapper
         Args:

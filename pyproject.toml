@@ -53,6 +53,9 @@ pdf = [
 selfcheck = [
     "lark==1.1.8"
 ]
+mongodb = [
+    "pymongo==4.6.1"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/Eurelis/Eurelis-KB-Framework"

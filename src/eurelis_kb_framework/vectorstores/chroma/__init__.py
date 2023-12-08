@@ -1,9 +1,14 @@
+from typing import TYPE_CHECKING
+
 import chromadb
 from chromadb import API
 from langchain.schema.vectorstore import VectorStore
 from langchain.vectorstores import Chroma
 
 from eurelis_kb_framework.base_factory import BaseFactory
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class ChromaFactory(BaseFactory[VectorStore]):
@@ -99,7 +104,7 @@ class ChromaFactory(BaseFactory[VectorStore]):
         elif self.mode == "http":
             return chromadb.HttpClient(self.host, self.port)
 
-    def build(self, context) -> VectorStore:
+    def build(self, context: "BaseContext") -> VectorStore:
         """
         Construct a chromadb based vector store
 

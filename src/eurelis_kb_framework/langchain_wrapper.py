@@ -12,6 +12,7 @@ from langchain.chains.base import Chain
 from langchain.indexes._api import _get_source_id_assigner
 from langchain.llms.base import BaseLLM
 from langchain.schema import Document
+from langchain.schema.vectorstore import VectorStore
 
 from eurelis_kb_framework.acronyms import AcronymsTextTransformer
 from eurelis_kb_framework.acronyms.acronyms_chain_wrapper import AcronymsChainWrapper
@@ -20,7 +21,7 @@ from eurelis_kb_framework.class_loader import ClassLoader
 from eurelis_kb_framework.dataset import DatasetFactory
 from eurelis_kb_framework.dataset.dataset import Dataset
 from eurelis_kb_framework.types import FACTORY, EMBEDDING, DOCUMENT_MEAN_EMBEDDING
-from eurelis_kb_framework.utils import parse_param_value
+from eurelis_kb_framework.utils import parse_param_value, batched
 
 
 class BaseContext(ABC):
@@ -260,6 +261,26 @@ class LangchainWrapper(BaseContext):
                             "namespace"
                         ] = f"{self.project}/{dataset.name}"
                         yield document
+
+                if type(dataset.vector_store).delete == VectorStore.delete:
+                    if dataset.cleanup is not None:
+                        raise ValueError(
+                            f"unsupported {dataset.cleanup} cleanup method, this vector store only accept None"
+                        )
+
+                    num_added = 0
+
+                    for docs in batched(with_namespace(dataset_documents), 100):
+                        num_added += len(docs)
+                        dataset.vector_store.add_documents(docs)
+
+                    return {
+                        "cleanup": "None",
+                        "num_added": num_added,
+                        "num_updated": "-",
+                        "num_skipped": "-",
+                        "num_deleted": "-",
+                    }
 
                 return index(
                     with_namespace(dataset_documents),

@@ -1,9 +1,12 @@
 import types
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from langchain.document_loaders.base import BaseLoader
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 def _parsing_function_factory(remove_list: list):
@@ -52,7 +55,7 @@ class SitemapDocumentLoaderFactory(ParamsDictFactory[BaseLoader]):
         "restrict_to_same_domain",
     }
 
-    def build(self, context) -> BaseLoader:
+    def build(self, context: "BaseContext") -> BaseLoader:
         """
         Construct the sitemap document loader
 

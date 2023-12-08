@@ -1,10 +1,13 @@
 import logging
 from enum import Enum
-from typing import Union, Optional
+from typing import Union, Optional, TYPE_CHECKING
 
 from eurelis_kb_framework.base_factory import BaseFactory
 from eurelis_kb_framework.output.base_console_output import BaseConsoleOutput
 from eurelis_kb_framework.output.output import Output
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class Verbosity(Enum):
@@ -47,7 +50,7 @@ class OutputFactory(BaseFactory[Output]):
         else:
             self.verbosity_level = verbose
 
-    def build(self, context) -> Output:
+    def build(self, context: "BaseContext") -> Output:
         """
         Method to construct a BaseConsoleOutput
         Args:

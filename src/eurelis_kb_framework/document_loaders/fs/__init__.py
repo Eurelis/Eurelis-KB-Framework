@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING
+
 from langchain.document_loaders.base import BaseLoader
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
 from eurelis_kb_framework.types import FACTORY
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
@@ -66,7 +71,7 @@ class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
             )
             arguments["parser"] = parser.build(context)
 
-    def build(self, context) -> BaseLoader:
+    def build(self, context: "BaseContext") -> BaseLoader:
         """
         Construct the document loader
 

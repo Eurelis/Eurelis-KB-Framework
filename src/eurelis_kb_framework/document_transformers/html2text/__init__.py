@@ -1,6 +1,11 @@
+from typing import TYPE_CHECKING
+
 from langchain.schema import BaseDocumentTransformer
 
 from eurelis_kb_framework.base_factory import BaseFactory
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class Html2TextTransformerFactory(BaseFactory[BaseDocumentTransformer]):
@@ -8,7 +13,7 @@ class Html2TextTransformerFactory(BaseFactory[BaseDocumentTransformer]):
     Factory for the Html2TextTransformer
     """
 
-    def build(self, context) -> BaseDocumentTransformer:
+    def build(self, context: "BaseContext") -> BaseDocumentTransformer:
         """Construct the Html2textTransformer
 
         Args:

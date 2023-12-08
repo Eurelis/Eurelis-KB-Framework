@@ -1,9 +1,13 @@
-from typing import Iterable
+from typing import Iterable, TYPE_CHECKING
 
 from langchain.document_loaders.base import BaseLoader
 
-from eurelis_kb_framework.base_factory import ParamsDictFactory, FACTORY
+from eurelis_kb_framework.base_factory import ParamsDictFactory
 from eurelis_kb_framework.document_loaders.list.list_loader import ListLoader
+from eurelis_kb_framework.types import FACTORY
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class ListLoaderFactory(ParamsDictFactory[BaseLoader]):
@@ -73,7 +77,7 @@ class ListLoaderFactory(ParamsDictFactory[BaseLoader]):
                 f"List document loader is missing following required parameters: {str(missing_parameters)}"
             )
 
-    def build(self, context) -> BaseLoader:
+    def build(self, context: "BaseContext") -> BaseLoader:
         """
         Construct the List loader
         Args:

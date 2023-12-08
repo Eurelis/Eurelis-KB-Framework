@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import TYPE_CHECKING
 
 from eurelis_kb_framework.acronyms.acronyms_document_transformer import (
     AcronymsDocumentTransformer,
@@ -10,6 +11,9 @@ from eurelis_kb_framework.base_factory import (
 )
 from eurelis_kb_framework.dataset.dataset import Dataset
 from eurelis_kb_framework.types import FACTORY
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class DatasetFactory(ParamsDictFactory[Dataset]):
@@ -127,7 +131,7 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
 
         instance.set_index(index)
 
-    def build(self, context) -> Dataset:
+    def build(self, context: "BaseContext") -> Dataset:
         """
         Method to build the dataset object
         Args:

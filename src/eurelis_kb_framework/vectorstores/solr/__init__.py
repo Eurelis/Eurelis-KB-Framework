@@ -1,6 +1,11 @@
+from typing import TYPE_CHECKING
+
 from langchain.schema.vectorstore import VectorStore
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class SolrFactory(ParamsDictFactory[VectorStore]):
@@ -10,7 +15,7 @@ class SolrFactory(ParamsDictFactory[VectorStore]):
 
     OPTIONAL_PARAMS = {"page_content_field", "vector_field", "core_name", "url_base"}
 
-    def build(self, context) -> VectorStore:
+    def build(self, context: "BaseContext") -> VectorStore:
         """
         Construct a solr based vector store
 

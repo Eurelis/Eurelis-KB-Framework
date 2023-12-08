@@ -1,6 +1,11 @@
+from typing import TYPE_CHECKING
+
 from langchain.document_loaders.base import BaseLoader
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class UrlLoaderFactory(ParamsDictFactory[BaseLoader]):
@@ -61,7 +66,7 @@ class UrlLoaderFactory(ParamsDictFactory[BaseLoader]):
         if max_depth > 1:
             self.is_recursive = True
 
-    def build(self, context) -> BaseLoader:
+    def build(self, context: "BaseContext") -> BaseLoader:
         """
         Construct the url document loader
 

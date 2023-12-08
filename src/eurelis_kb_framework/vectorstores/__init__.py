@@ -11,4 +11,5 @@ class GenericVectorStoreFactory(ProviderFactory[VectorStore]):
     ALLOWED_PROVIDERS = {
         "chroma": "eurelis_kb_framework.vectorstores.chroma.ChromaFactory",
         "solr": "eurelis_kb_framework.vectorstores.solr.SolrFactory",
+        "mongodb": "eurelis_kb_framework.vectorstores.mongodb.MongoDBVectorStoreFactory",
     }

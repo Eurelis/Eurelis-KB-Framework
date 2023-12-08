@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import Iterator, TYPE_CHECKING
 
 from langchain.document_loaders import Blob
 from langchain.document_loaders.base import BaseBlobParser
@@ -6,6 +6,9 @@ from langchain.schema import Document
 
 from eurelis_kb_framework.base_factory import BaseFactory
 from eurelis_kb_framework.dataset.dataset import Dataset
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class DocumentCacheParser(BaseBlobParser):
@@ -30,7 +33,7 @@ class DocumentCacheParserFactory(BaseFactory[BaseBlobParser]):
     Factory for the document cache parser
     """
 
-    def build(self, context) -> BaseBlobParser:
+    def build(self, context: "BaseContext") -> BaseBlobParser:
         """
         Construct the document cache parser instance
         Args:

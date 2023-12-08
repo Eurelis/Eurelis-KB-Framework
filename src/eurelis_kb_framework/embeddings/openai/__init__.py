@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING
+
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.schema.embeddings import Embeddings
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class OpenAIEmbeddingsFactory(ParamsDictFactory[Embeddings]):
@@ -31,7 +36,7 @@ class OpenAIEmbeddingsFactory(ParamsDictFactory[Embeddings]):
         "tiktoken_model_name",
     }
 
-    def build(self, context) -> Embeddings:
+    def build(self, context: "BaseContext") -> Embeddings:
         """
         Construct the openai object
 
