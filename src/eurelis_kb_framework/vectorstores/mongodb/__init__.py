@@ -23,13 +23,13 @@ class MongoDBVectorStoreFactory(ParamsDictFactory[VectorStore]):
 
     def build(self, context: "BaseContext") -> VectorStore:
         """
-        Construct a chromadb based vector store
+        Construct a mongodb based vector store
 
         Args:
             context: the context object, usually the current langchain wrapper instance
 
         Returns:
-            a chroma vector store object
+            a mongodb vector store object
         """
         from pymongo import MongoClient
         from langchain.vectorstores import MongoDBAtlasVectorSearch
