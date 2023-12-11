@@ -252,11 +252,6 @@ class LangchainWrapper(BaseContext):
                 continue
 
             namespace = f"{self.project}/{dataset.name}"
-            record_manager = SQLRecordManager(
-                namespace, db_url=self.record_manager_db_url
-            )
-
-            record_manager.create_schema()
 
             def index_dataset():
                 dataset_documents = dataset.lazy_load()
@@ -287,6 +282,12 @@ class LangchainWrapper(BaseContext):
                         "num_skipped": "-",
                         "num_deleted": "-",
                     }
+
+                record_manager = SQLRecordManager(
+                    namespace, db_url=self.record_manager_db_url
+                )
+
+                record_manager.create_schema()
 
                 return index(
                     with_namespace(dataset_documents),
