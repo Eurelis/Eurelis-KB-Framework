@@ -31,18 +31,18 @@ init-project: update-venv install-black install-pylint
 #
 # Build
 #
-build-project: update-venv
+package-build: update-venv
 	@echo "***** $@"
 	@source .venv/bin/activate &&\
 	pip install --upgrade build &&\
 	python -m build
 
-fast-rebuild:
+package-fast-rebuild:
 	@echo "***** $@"
 	@source .venv/bin/activate &&\
 	python -m build
 
-upload-project: build-project
+package-upload: package-build
 	@echo "***** $@"
 	@source .venv/bin/activate &&\
 	pip install --upgrade twine &&\
