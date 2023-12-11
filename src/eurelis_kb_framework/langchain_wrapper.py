@@ -142,11 +142,9 @@ class LangchainWrapper(BaseContext):
 
             sqlite_prefix = "sqlite:///"
 
-            if "record_manager" in config and config["record_manager"].startswith(
-                sqlite_prefix
-            ):
+            if self.record_manager_db_url.startswith(sqlite_prefix):
                 sqlite_length = len(sqlite_prefix)
-                path = config["record_manager"][sqlite_length:]
+                path = self.record_manager_db_url[sqlite_length:]
                 path = path if os.path.isabs(path) else os.path.join(os.getcwd(), path)
                 file_folder = Path(os.path.dirname(path))
                 os.makedirs(file_folder, exist_ok=True)
