@@ -11,6 +11,7 @@ from eurelis_kb_framework.base_factory import (
 )
 from eurelis_kb_framework.dataset.dataset import Dataset
 from eurelis_kb_framework.types import FACTORY
+from eurelis_kb_framework.utils import parse_param_value
 
 if TYPE_CHECKING:
     from eurelis_kb_framework.langchain_wrapper import BaseContext
@@ -110,10 +111,10 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
 
         if output:
             if isinstance(output, str):
-                output_folder = output
+                output_folder = parse_param_value(output)
             elif isinstance(output, dict):
-                output_folder = output.get("folder")
-                output_file_varname = output.get("varname", "id")
+                output_folder = parse_param_value(output.get("folder"))
+                output_file_varname = parse_param_value(output.get("varname", "id"))
 
         instance.set_output_folder(output_folder)
         instance.set_output_file_varname(output_file_varname)
