@@ -1,6 +1,7 @@
 import json
 import os.path
 from pathlib import Path
+from string import Template
 from typing import List, Iterator, Iterable, Optional
 
 from langchain.document_loaders.base import BaseLoader
@@ -35,6 +36,22 @@ class Dataset(BaseLoader):
         self.vector_store = None
         self.embeddings = None
         self.metadata = None
+        self.text_template: Optional[Template] = None
+
+    def set_text_template(self, value: str):
+        """Setter for the text_template
+        Args:
+            value (str): the value
+        """
+        self.text_template = Template(value)
+
+    def has_template(self) -> bool:
+        return bool(self.text_template)
+
+    def apply_text_template(self, doc: Document):
+        substitute_dict = dict((f"meta_{k}", v) for k, v in doc.metadata.items())
+        substitute_dict["page_content"] = doc.page_content
+        doc.page_content = self.text_template.substitute(substitute_dict)
 
     def set_splitter(self, splitter: TextSplitter):
         """

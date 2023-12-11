@@ -119,6 +119,10 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
         instance.set_output_folder(output_folder)
         instance.set_output_file_varname(output_file_varname)
 
+        template = self.params.get("text_template")
+        if template:
+            instance.set_text_template(template)
+
     def _handle_index(self, instance: Dataset):
         """
         Helper method to handle index related options

@@ -257,11 +257,21 @@ class LangchainWrapper(BaseContext):
                 dataset_documents = dataset.lazy_load()
 
                 def with_namespace(documents: Iterator[Document]) -> Iterator[Document]:
-                    for document in documents:
-                        document.metadata[
-                            "namespace"
-                        ] = f"{self.project}/{dataset.name}"
-                        yield document
+                    # two different loops for performance reason
+                    if dataset.has_template():
+                        for document in documents:
+                            document.metadata[
+                                "namespace"
+                            ] = f"{self.project}/{dataset.name}"
+                            # in this case we apply the text template
+                            dataset.apply_text_template(document)
+                            yield document
+                    else:
+                        for document in documents:
+                            document.metadata[
+                                "namespace"
+                            ] = f"{self.project}/{dataset.name}"
+                            yield document
 
                 if type(dataset.vector_store).delete == VectorStore.delete:
                     if dataset.cleanup is not None:
