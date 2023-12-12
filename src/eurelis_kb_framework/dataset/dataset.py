@@ -2,13 +2,26 @@ import json
 import os.path
 from pathlib import Path
 from string import Template
-from typing import List, Iterator, Iterable, Optional
+from typing import List, Iterator, Iterable, Optional, cast, Mapping
 
 from langchain.document_loaders.base import BaseLoader
 from langchain.schema import Document, BaseDocumentTransformer
 from langchain.text_splitter import TextSplitter
 
 from eurelis_kb_framework.base_factory import JSON
+
+
+class TemplateTextDocWrapper:
+    def __init__(self, document: Document):
+        self.document = document
+
+    def __getitem__(self, key: str):
+        if key == "page_content":
+            return self.document.page_content
+        elif key.startswith("meta_"):
+            return self.document.metadata.get(key[5:], "")
+
+        raise ValueError(f"Unhandled key {key} in text_template")
 
 
 class Dataset(BaseLoader):
@@ -49,9 +62,8 @@ class Dataset(BaseLoader):
         return bool(self.text_template)
 
     def apply_text_template(self, doc: Document):
-        substitute_dict = dict((f"meta_{k}", v) for k, v in doc.metadata.items())
-        substitute_dict["page_content"] = doc.page_content
-        doc.page_content = self.text_template.substitute(substitute_dict)
+        substitute_dict = cast(Mapping[str, object], TemplateTextDocWrapper(doc))
+        doc.page_content = self.text_template.safe_substitute(substitute_dict)
 
     def set_splitter(self, splitter: TextSplitter):
         """
