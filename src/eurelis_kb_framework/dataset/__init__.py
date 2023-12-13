@@ -14,7 +14,7 @@ from eurelis_kb_framework.types import FACTORY
 from eurelis_kb_framework.utils import parse_param_value
 
 if TYPE_CHECKING:
-    from eurelis_kb_framework.langchain_wrapper import BaseContext
+    from eurelis_kb_framework.langchain_wrapper import LangchainWrapper
 
 
 class DatasetFactory(ParamsDictFactory[Dataset]):
@@ -136,7 +136,7 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
 
         instance.set_index(index)
 
-    def build(self, context: "BaseContext") -> Dataset:
+    def build(self, context: "LangchainWrapper") -> Dataset:
         """
         Method to build the dataset object
         Args:

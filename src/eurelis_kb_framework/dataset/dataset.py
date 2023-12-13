@@ -2,7 +2,7 @@ import json
 import os.path
 from pathlib import Path
 from string import Template
-from typing import List, Iterator, Iterable, Optional, cast, Mapping
+from typing import List, Iterator, Iterable, Optional, cast, Mapping, Callable
 
 from langchain.document_loaders.base import BaseLoader
 from langchain.schema import Document, BaseDocumentTransformer
@@ -357,3 +357,30 @@ class Dataset(BaseLoader):
 
         """
         self.vector_store = vector_store
+
+    def build_with_namespace_function(
+        self, project: str
+    ) -> Callable[[Iterator[Document]], Iterator[Document]]:
+        """Build the "with_namespace" function used before indexing
+
+        Args:
+            project (str): name of the project
+
+        Returns:
+            a method taking documents in entry and returning documents
+        """
+
+        def with_namespace(documents: Iterator[Document]) -> Iterator[Document]:
+            # two different loops for performance reason
+            if self.has_template():
+                for document in documents:
+                    document.metadata["namespace"] = f"{project}/{self.name}"
+                    # in this case we apply the text template
+                    self.apply_text_template(document)
+                    yield document
+            else:
+                for document in documents:
+                    document.metadata["namespace"] = f"{project}/{self.name}"
+                    yield document
+
+        return with_namespace

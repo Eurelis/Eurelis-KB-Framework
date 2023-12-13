@@ -5,7 +5,18 @@ import os.path
 from abc import ABC
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional, Sequence, Union, Iterator, cast, List, Iterable, Tuple
+from typing import (
+    Optional,
+    Sequence,
+    Union,
+    Iterator,
+    cast,
+    List,
+    Iterable,
+    Tuple,
+    Callable,
+    Mapping,
+)
 
 import numpy as np
 from bson import ObjectId
@@ -251,61 +262,9 @@ class LangchainWrapper(BaseContext):
                 self.write_files(dataset.id)
                 continue
 
-            namespace = f"{self.project}/{dataset.name}"
-
-            def index_dataset():
-                dataset_documents = dataset.lazy_load()
-
-                def with_namespace(documents: Iterator[Document]) -> Iterator[Document]:
-                    # two different loops for performance reason
-                    if dataset.has_template():
-                        for document in documents:
-                            document.metadata[
-                                "namespace"
-                            ] = f"{self.project}/{dataset.name}"
-                            # in this case we apply the text template
-                            dataset.apply_text_template(document)
-                            yield document
-                    else:
-                        for document in documents:
-                            document.metadata[
-                                "namespace"
-                            ] = f"{self.project}/{dataset.name}"
-                            yield document
-
-                if type(dataset.vector_store).delete == VectorStore.delete:
-                    if dataset.cleanup is not None:
-                        raise ValueError(
-                            f"unsupported {dataset.cleanup} cleanup method, this vector store only accept None"
-                        )
-
-                    num_added = 0
-
-                    for docs in batched(with_namespace(dataset_documents), 100):
-                        num_added += len(docs)
-                        dataset.vector_store.add_documents(docs)
-
-                    return {
-                        "cleanup": "None",
-                        "num_added": num_added,
-                        "num_updated": "-",
-                        "num_skipped": "-",
-                        "num_deleted": "-",
-                    }
-
-                record_manager = SQLRecordManager(
-                    namespace, db_url=self.record_manager_db_url
-                )
-
-                record_manager.create_schema()
-
-                return index(
-                    with_namespace(dataset_documents),
-                    record_manager,
-                    dataset.vector_store,
-                    cleanup=dataset.cleanup,
-                    source_id_key=dataset.source_id_key,
-                )
+            index_dataset = LangchainWrapper.build_index_dataset(
+                dataset, self.project, self.record_manager_db_url
+            )
 
             return_value = self.console.status(
                 f"Indexing '{dataset.id}' dataset using '{dataset.cleanup}' cleanup method.",
@@ -871,3 +830,61 @@ class LangchainWrapper(BaseContext):
 
         # use the factory to build the object
         return factory.build(context)
+
+    @staticmethod
+    def build_index_dataset(
+        dataset: Dataset, project: str, record_manager_db_url: str
+    ) -> Callable[[], Mapping[str, int]]:
+        """Build the index_dataset method
+
+        Args:
+            dataset: the dataset
+            project: name of the project
+            record_manager_db_url: url to store record_manager
+
+        Returns:
+            The index_dataset method
+        """
+
+        from langchain.indexes import SQLRecordManager, index
+
+        namespace = f"{project}/{dataset.name}"
+
+        def index_dataset():
+            dataset_documents = dataset.lazy_load()
+
+            with_namespace = dataset.build_with_namespace_function(project)
+
+            if type(dataset.vector_store).delete == VectorStore.delete:
+                if dataset.cleanup is not None:
+                    raise ValueError(
+                        f"unsupported {dataset.cleanup} cleanup method, this vector store only accept None"
+                    )
+
+                num_added = 0
+
+                for docs in batched(with_namespace(dataset_documents), 100):
+                    num_added += len(docs)
+                    dataset.vector_store.add_documents(docs)
+
+                return {
+                    "cleanup": "None",
+                    "num_added": num_added,
+                    "num_updated": "-",
+                    "num_skipped": "-",
+                    "num_deleted": "-",
+                }
+
+            record_manager = SQLRecordManager(namespace, db_url=record_manager_db_url)
+
+            record_manager.create_schema()
+
+            return index(
+                with_namespace(dataset_documents),
+                record_manager,
+                dataset.vector_store,
+                cleanup=dataset.cleanup,
+                source_id_key=dataset.source_id_key,
+            )
+
+        return index_dataset
