@@ -1,11 +1,13 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Optional, Dict, List, Tuple
 
+from langchain.schema import Document
 from langchain.schema.vectorstore import VectorStore
+from langchain.vectorstores import MongoDBAtlasVectorSearch
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
 
 if TYPE_CHECKING:
-    from eurelis_kb_framework.langchain_wrapper import BaseContext
+    from eurelis_kb_framework.langchain_wrapper import LangchainWrapper
 
 
 class MongoDBVectorStoreFactory(ParamsDictFactory[VectorStore]):
@@ -21,7 +23,7 @@ class MongoDBVectorStoreFactory(ParamsDictFactory[VectorStore]):
         self.params["text_key"] = "text"
         self.params["embedding_key"] = "embedding"
 
-    def build(self, context: "BaseContext") -> VectorStore:
+    def build(self, context: "LangchainWrapper") -> VectorStore:
         """
         Construct a mongodb based vector store
 
@@ -32,7 +34,9 @@ class MongoDBVectorStoreFactory(ParamsDictFactory[VectorStore]):
             a mongodb vector store object
         """
         from pymongo import MongoClient
-        from langchain.vectorstores import MongoDBAtlasVectorSearch
+        from eurelis_kb_framework.vectorstores.mongodb.mongodb_similarity_atlas_vector_store_search import (
+            MongoDBSimilarityAtlasVectorStoreSearch,
+        )
 
         url = self.params.get("url")
         db_name = self.params.get("db_name", "knowledge_base")
@@ -70,4 +74,6 @@ class MongoDBVectorStoreFactory(ParamsDictFactory[VectorStore]):
 
             collection.create_search_index(search_index)
 
-        return MongoDBAtlasVectorSearch(collection, context.embeddings, **other_params)
+        return MongoDBSimilarityAtlasVectorStoreSearch(
+            collection, context.embeddings, **other_params
+        )
