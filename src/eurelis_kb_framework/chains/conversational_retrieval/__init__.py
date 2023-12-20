@@ -30,6 +30,8 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
         self.condense_question_prompt = None
 
         self.combine_docs_chain_kwargs = None
+        self.output_format = None
+        self.output_field = None
 
     def set_condense_question_prompt(self, value: str):
         if not isinstance(value, str):

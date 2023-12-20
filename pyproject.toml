@@ -56,6 +56,9 @@ selfcheck = [
 mongodb = [
     "pymongo==4.6.1"
 ]
+markdown = [
+    "markdown==3.5.1"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/Eurelis/Eurelis-KB-Framework"
