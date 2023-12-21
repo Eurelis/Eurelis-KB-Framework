@@ -51,7 +51,7 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
                 f"Bad combine_docs_chain_kwargs value, expecting a dict, got {type(value)}"
             )
 
-        self.combine_docs_chain_kwargs = value
+        self.combine_docs_chain_kwargs = value.copy()
         if "prompt" in value:
             prompt_value = value.get("prompt")
             if not isinstance(prompt_value, dict):
@@ -60,7 +60,6 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
                 )
             system = prompt_value.get("system")
             human = prompt_value.get("human")
-            print(system)
 
             if not system or not isinstance(system, str) or "{context}" not in system:
                 raise ValueError(

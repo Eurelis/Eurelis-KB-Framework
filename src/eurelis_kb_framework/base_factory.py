@@ -195,6 +195,8 @@ class ProviderFactory(ParamsDictFactory, Generic[T]):
 
         """
         factory = self._get_provider(context)
-        factory.set_params(self.params)
+        factory.set_params(
+            self.params.copy()
+        )  # work on a copy to prevent issues from factory mutating the params
 
         return factory.build(context)
