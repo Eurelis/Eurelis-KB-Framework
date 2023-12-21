@@ -206,13 +206,14 @@ def search(ctx, query, filters):
 
 
 @cli.command()
+@click.option("--selfcheck/--no-selfcheck", default=False)
 @click.pass_context
-def gradio(ctx):
+def gradio(ctx, selfcheck: bool):
     wrapper = ctx.obj["singleton"]()
 
     from eurelis_kb_framework import gradiochat
 
-    gradiochat.define_chatbot(wrapper).launch()
+    gradiochat.define_chatbot(wrapper, selfcheck).launch()
 
 
 # enable the dataset and search commands

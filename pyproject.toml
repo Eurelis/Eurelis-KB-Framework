@@ -50,14 +50,15 @@ pdf = [
     "pypdf==3.16.4",
     "cryptography==41.0.7"
 ]
-selfcheck = [
-    "lark==1.1.8"
-]
 mongodb = [
     "pymongo==4.6.1"
 ]
 markdown = [
     "markdown==3.5.1"
+]
+selfcheck = [
+    "selfcheckgpt==0.1.4",
+    "lark==1.1.8"
 ]
 
 [project.urls]
