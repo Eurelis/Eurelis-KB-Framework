@@ -66,7 +66,9 @@ class SitemapDocumentLoaderFactory(ParamsDictFactory[BaseLoader]):
             a document loader
         """
         from langchain.document_loaders.sitemap import SitemapLoader
-        from langchain.document_loaders.web_base import default_header_template
+        from langchain_community.document_loaders.web_base import (
+            default_header_template,
+        )
 
         web_path = self.params.get("web_path")
 

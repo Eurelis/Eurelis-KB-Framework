@@ -18,7 +18,7 @@ classifiers = [
 ]
 dependencies = [
     "python-dotenv==1.0.0",
-    "langchain==0.0.348",
+    "langchain==0.0.352",
     "sqlalchemy==2.0.21",
     "rich==13.4.2",
     "click==8.1.7",
