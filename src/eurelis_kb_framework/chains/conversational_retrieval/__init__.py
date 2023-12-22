@@ -33,8 +33,16 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
         self.condense_question_prompt = None
 
         self.combine_docs_chain_kwargs = None
+        self.condense_question_llm_factory = None
         self.output_format = None
         self.output_field = None
+
+    def set_condense_question_llm(self, value: FACTORY):
+        if not isinstance(value, (str, dict)):
+            raise ValueError(
+                "condense_question_llm parameter is expected to be a factory (str ou dict)"
+            )
+        self.condense_question_llm_factory = value.copy()
 
     def set_condense_question_prompt(self, value: str):
         if not isinstance(value, str):
@@ -131,6 +139,15 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
             other_args["condense_question_prompt"] = self.condense_question_prompt
         if self.combine_docs_chain_kwargs:
             other_args["combine_docs_chain_kwargs"] = self.combine_docs_chain_kwargs
+        if self.condense_question_llm_factory:
+            other_args[
+                "condense_question_llm"
+            ] = context.__class__.get_instance_from_factory(
+                context,
+                DefaultFactories.LLM,
+                self.condense_question_llm_factory,
+                mandatory=True,
+            )
 
         # build and return the chain
         return ConversationalRetrievalChain.from_llm(
