@@ -1,5 +1,6 @@
-from typing import Optional, Dict, List, Tuple, Callable
+from typing import Optional, Dict, List, Tuple, Callable, Any
 
+from bson import ObjectId
 from langchain.schema import Document
 from langchain.vectorstores import MongoDBAtlasVectorSearch
 
@@ -45,3 +46,23 @@ class MongoDBSimilarityAtlasVectorStoreSearch(MongoDBAtlasVectorSearch):
         Vectorstores should define their own selection based method of relevance.
         """
         return lambda x: x
+
+    def delete(self, ids: Optional[List[str]] = None, **kwargs: Any) -> Optional[bool]:
+        """Delete by vector ID or other criteria.
+
+        Args:
+            ids: List of ids to delete.
+            **kwargs: Other keyword arguments that subclasses might use.
+
+        Returns:
+            Optional[bool]: True if deletion is successful,
+            False otherwise, None if not implemented.
+        """
+
+        if not ids:
+            return True
+
+        del_query = {"_id": {"$in": list(lambda oid: ObjectId(oid), ids)}}
+        self._collection.delete_many(del_query)
+
+        return True
