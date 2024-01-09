@@ -44,8 +44,6 @@ def define_chatbot(wrapper, selfcheck: bool = False):
     else:
         define_chatbot.callbacks = []
 
-    # define_chatbot.chain = wrapper.get_chain(retriever_kwargs={'search_kwargs': {'filter': {'article_num': "R141-38-4"}}})
-
     with gr.Blocks() as demo:
         with gr.Row():
             with gr.Column(scale=2):
