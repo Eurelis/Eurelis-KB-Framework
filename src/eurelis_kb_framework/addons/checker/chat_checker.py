@@ -28,9 +28,6 @@ class ChatChecker:
         )
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # selfcheck_mqag = SelfCheckMQAG(
-        #    device=device
-        # )  # set device to 'cuda' if GPU is available
 
         samples = self._produce_samples(input.messages)
 

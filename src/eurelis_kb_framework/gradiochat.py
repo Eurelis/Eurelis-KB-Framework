@@ -31,8 +31,6 @@ def selfcheck_from_memory() -> Optional[dict]:
 def define_chatbot(wrapper, selfcheck: bool = False):
     define_chatbot.chain = wrapper.get_chain()
 
-    # example with filter: define_chatbot.chain = wrapper.get_chain(retriever_kwargs={'search_kwargs': {'filter': {'article_num': "R141-38-4"}}})
-
     if selfcheck:
         from eurelis_kb_framework.addons.checker.chat_checker import ChatChecker
         from eurelis_kb_framework.addons.checker.check_input_callback import (

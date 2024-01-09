@@ -9,7 +9,9 @@ from eurelis_kb_framework.addons.checker.chat_checker import ChatChecker
 
 
 class CheckInputCallback(BaseCallbackHandler):
-    def __init__(self, checker, method: Optional[Method] = Method.NLI, language: str = "en"):
+    def __init__(
+        self, checker, method: Optional[Method] = Method.NLI, language: str = "en"
+    ):
         super().__init__()
         self.messages = []
         self.checker: ChatChecker = checker
@@ -20,11 +22,6 @@ class CheckInputCallback(BaseCallbackHandler):
         self,
         serialized: Dict[str, Any],
         messages: List[List[BaseMessage]],
-        *,
-        run_id: UUID,
-        parent_run_id: Optional[UUID] = None,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Any:
         self.messages = messages[
