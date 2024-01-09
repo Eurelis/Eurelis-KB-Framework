@@ -47,6 +47,29 @@ class MongoDBSimilarityAtlasVectorStoreSearch(MongoDBAtlasVectorSearch):
         """
         return lambda x: x
 
+    def add_documents(self, documents: List[Document], **kwargs: Any) -> List[str]:
+        """Run more documents through the embeddings and add to the vectorstore.
+
+        Args:
+            documents (List[Document]: Documents to add to the vectorstore.
+
+        Returns:
+            List[str]: List of IDs of the added texts.
+        """
+        if "ids" in kwargs:
+            # to enable deleting documents we must store the unique id used by the index system
+            ids = kwargs["ids"]
+            if len(ids) != len(documents):
+                raise ValueError("ids length mismatch documents length")
+
+            for doc_index, doc in enumerate(documents):
+                doc.metadata["_uid"] = ids[doc_index]
+
+        # TODO: Handle the case where the user doesn't provide ids on the Collection
+        texts = [doc.page_content for doc in documents]
+        metadatas = [doc.metadata for doc in documents]
+        return self.add_texts(texts, metadatas, **kwargs)
+
     def delete(self, ids: Optional[List[str]] = None, **kwargs: Any) -> Optional[bool]:
         """Delete by vector ID or other criteria.
 
@@ -62,7 +85,9 @@ class MongoDBSimilarityAtlasVectorStoreSearch(MongoDBAtlasVectorSearch):
         if not ids:
             return True
 
-        del_query = {"_id": {"$in": list(lambda oid: ObjectId(oid), ids)}}
+        print(kwargs)
+
+        del_query = {"_uid": {"$in": ids}}
         self._collection.delete_many(del_query)
 
         return True
