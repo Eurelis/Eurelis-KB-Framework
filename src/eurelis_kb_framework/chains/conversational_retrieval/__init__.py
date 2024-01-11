@@ -72,15 +72,23 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
             system = prompt_value.get("system")
             human = prompt_value.get("human")
 
+            if isinstance(system, list) and all(
+                isinstance(item, str) for item in system
+            ):
+                system = " ".join(system)
+
+            if isinstance(human, list) and all(isinstance(item, str) for item in human):
+                human = " ".join(human)
+
             if not system or not isinstance(system, str) or "{context}" not in system:
                 raise ValueError(
                     "Bad combine_docs_chain_kwargs prompt value, "
-                    + "should have contain a system key with an associated text containing {context}"
+                    + "should have contain a system key with an associated text (or a list) containing {context}"
                 )
             if not human or not isinstance(human, str) or "{question}" not in human:
                 raise ValueError(
                     "Bad combine_docs_chain_kwargs prompt value, "
-                    + "should have contain a human key with an associated text containing {question}"
+                    + "should have contain a human key with an associated text (or a list) containing {question}"
                 )
 
             self.combine_docs_chain_kwargs["prompt"] = ChatPromptTemplate.from_messages(
