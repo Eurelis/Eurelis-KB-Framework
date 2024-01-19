@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Any
 
 from langchain.chains.base import Chain
 
@@ -17,6 +17,13 @@ from eurelis_kb_framework.base_factory import (
     DefaultFactories,
 )
 from eurelis_kb_framework.types import FACTORY
+
+
+def _extract_list_or_string(value: Union[str, list]) -> Any:
+    if isinstance(value, list) and all(isinstance(item, str) for item in value):
+        return " ".join(value)
+
+    return value
 
 
 class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
@@ -44,7 +51,8 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
             )
         self.condense_question_llm_factory = value.copy()
 
-    def set_condense_question_prompt(self, value: str):
+    def set_condense_question_prompt(self, value: Union[str, list]):
+        value = _extract_list_or_string(value)
         if not isinstance(value, str):
             raise ValueError(
                 "Bad condensed_question_prompt value given, expected str got {type(str)}"
@@ -69,16 +77,8 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
                 raise ValueError(
                     f"Bad combine_docs_chain_kwargs prompt value, expecting a dict, got {type(value)}"
                 )
-            system = prompt_value.get("system")
-            human = prompt_value.get("human")
-
-            if isinstance(system, list) and all(
-                isinstance(item, str) for item in system
-            ):
-                system = " ".join(system)
-
-            if isinstance(human, list) and all(isinstance(item, str) for item in human):
-                human = " ".join(human)
+            system = _extract_list_or_string(prompt_value.get("system"))
+            human = _extract_list_or_string(prompt_value.get("human"))
 
             if not system or not isinstance(system, str) or "{context}" not in system:
                 raise ValueError(
