@@ -21,7 +21,7 @@ class HuggingFaceEmbeddingsFactory(ParamsDictFactory[Embeddings]):
         Returns:
             embeddings
         """
-        from langchain.embeddings import HuggingFaceEmbeddings
+        from langchain_community.embeddings import HuggingFaceEmbeddings
 
         arguments = self.get_optional_params()
 

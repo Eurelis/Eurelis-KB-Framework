@@ -22,7 +22,9 @@ dependencies = [
     "sqlalchemy==2.0.21",
     "rich==13.4.2",
     "click==8.1.7",
-    "numpy==1.26.0"
+    "numpy==1.26.0",
+    "langchain-openai==0.0.2.post1",
+    "langchain-community==0.0.13"
 ]
 
 [project.optional-dependencies]
