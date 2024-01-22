@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "eurelis_kb_framework"
-version = "0.0.10a1"
+version = "0.0.10"
 authors = [
   { name="Jérôme DIAZ", email="j.diaz@eurelis.com" },
   { name="Vincent LAMBERT", email="v.lambert@eurelis.com" }
