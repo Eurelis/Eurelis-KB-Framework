@@ -1,7 +1,8 @@
+from typing import TYPE_CHECKING
+
 from langchain.chains.query_constructor.schema import AttributeInfo
 from langchain.retrievers import SelfQueryRetriever
 from langchain.schema import BaseRetriever
-from typing import TYPE_CHECKING
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory, DefaultFactories
 

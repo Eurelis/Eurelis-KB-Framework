@@ -1,8 +1,6 @@
-from typing import TYPE_CHECKING, Callable, Optional, Dict, List, Tuple
+from typing import TYPE_CHECKING
 
-from langchain.schema import Document
 from langchain.schema.vectorstore import VectorStore
-from langchain.vectorstores import MongoDBAtlasVectorSearch
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
 

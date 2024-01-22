@@ -1,5 +1,5 @@
-from typing import Iterator, TYPE_CHECKING
 import os
+from typing import Iterator, TYPE_CHECKING
 
 from langchain.document_loaders import Blob
 from langchain.document_loaders.base import BaseBlobParser

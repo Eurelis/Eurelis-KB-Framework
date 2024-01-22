@@ -1,5 +1,6 @@
-from langchain.schema import BaseRetriever
 from typing import TYPE_CHECKING
+
+from langchain.schema import BaseRetriever
 
 from eurelis_kb_framework import BaseFactory, T
 

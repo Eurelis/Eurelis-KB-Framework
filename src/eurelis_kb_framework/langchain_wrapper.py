@@ -9,7 +9,6 @@ from typing import (
     Optional,
     Sequence,
     Union,
-    Iterator,
     cast,
     List,
     Iterable,
@@ -249,7 +248,6 @@ class LangchainWrapper(BaseContext):
         self.ensure_initialized()
 
         dataset_index_results = OrderedDict()
-        from langchain.indexes import SQLRecordManager, index
 
         # TODO: add lockfile
 

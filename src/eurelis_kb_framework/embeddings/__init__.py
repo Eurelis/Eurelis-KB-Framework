@@ -2,10 +2,10 @@ from typing import TYPE_CHECKING
 
 from langchain.schema.embeddings import Embeddings
 
-from eurelis_kb_framework.base_factory import BaseFactory, ProviderFactory
+from eurelis_kb_framework.base_factory import ProviderFactory
 
 if TYPE_CHECKING:
-    from eurelis_kb_framework.langchain_wrapper import BaseContext
+    pass
 
 
 class GenericEmbeddingsFactory(ProviderFactory[Embeddings]):

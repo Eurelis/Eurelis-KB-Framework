@@ -1,6 +1,5 @@
-from typing import Optional, Dict, List, Tuple, Callable, Any
+from typing import Optional, List, Any
 
-from bson import ObjectId
 from langchain.schema import Document
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 
@@ -9,30 +8,6 @@ class MongoDBSimilarityAtlasVectorStoreSearch(MongoDBAtlasVectorSearch):
     """
     Class to enable similarity search with score on mongodb
     """
-
-    # def similarity_search_with_score(
-    #     self,
-    #     query: str,
-    #     k: int = 4,
-    #     *,
-    #     pre_filter: Optional[Dict] = None,
-    #     post_filter_pipeline: Optional[List[Dict]] = None,
-    # ) -> List[Tuple[Document, float]]:
-    #     """Override to fix an issue
-    #     TypeError: MongoDBAtlasVectorSearch.similarity_search_with_score() takes 2 positional arguments but 3 were given
-    #
-    #     Args:
-    #         query:
-    #         k:
-    #         pre_filter:
-    #         post_filter_pipeline:
-    #
-    #     Returns:
-    #
-    #     """
-    #     return super().similarity_search_with_score(
-    #         query, k=k, pre_filter=pre_filter, post_filter_pipeline=post_filter_pipeline
-    #     )
 
     def add_documents(self, documents: List[Document], **kwargs: Any) -> List[str]:
         """Run more documents through the embeddings and add to the vectorstore.

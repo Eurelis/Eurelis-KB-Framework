@@ -1,9 +1,7 @@
 import textwrap
-
 from typing import Optional
 
 import gradio as gr
-
 
 memory = {"documents": [], "selfcheck": None}
 

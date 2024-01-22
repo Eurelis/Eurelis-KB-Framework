@@ -1,16 +1,13 @@
 from typing import Union, Any
 
 from langchain.chains.base import Chain
-
 from langchain.prompts import (
     PromptTemplate,
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-
 from langchain.schema import BaseMemory
-
 
 from eurelis_kb_framework.base_factory import (
     ParamsDictFactory,
