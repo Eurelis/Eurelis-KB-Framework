@@ -219,9 +219,9 @@ class ClassLoader:
         Returns:
             a factory instance
         """
-        qualified_class = factory_dict.pop("factory", default_factory_class)
-        args = factory_dict.pop("args", list())
-        kwargs = factory_dict.pop("kwargs", dict())
+        qualified_class = factory_dict.get("factory", default_factory_class)
+        args = factory_dict.get("args", list())
+        kwargs = factory_dict.get("kwargs", dict())
 
         if not qualified_class:
             raise ValueError(
