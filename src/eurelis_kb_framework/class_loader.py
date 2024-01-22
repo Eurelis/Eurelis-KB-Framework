@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import importlib
 import os
 import sys
@@ -219,6 +220,7 @@ class ClassLoader:
         Returns:
             a factory instance
         """
+        factory_dict = copy.deepcopy(factory_dict)
         qualified_class = factory_dict.get("factory", default_factory_class)
         args = factory_dict.get("args", list())
         kwargs = factory_dict.get("kwargs", dict())
