@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import chromadb
 from chromadb import API
 from langchain.schema.vectorstore import VectorStore
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma
 
 from eurelis_kb_framework.base_factory import BaseFactory
 
@@ -102,7 +102,7 @@ class ChromaFactory(BaseFactory[VectorStore]):
             return chromadb.PersistentClient(self.path)
 
         elif self.mode == "http":
-            return chromadb.HttpClient(self.host, self.port)
+            return chromadb.HttpClient(self.host, str(self.port))
 
     def build(self, context: "BaseContext") -> VectorStore:
         """
