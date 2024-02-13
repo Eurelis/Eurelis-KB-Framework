@@ -14,6 +14,7 @@ class UrlLoaderFactory(ParamsDictFactory[BaseLoader]):
     """
 
     OPTIONAL_PARAMS = {
+        "max_depth",
         "use_async",
         "exclude_dirs",
         "timeout",
@@ -76,9 +77,13 @@ class UrlLoaderFactory(ParamsDictFactory[BaseLoader]):
         Returns:
             a document loader
         """
-        from langchain.document_loaders.recursive_url_loader import RecursiveUrlLoader
+        from langchain_community.document_loaders.recursive_url_loader import (
+            RecursiveUrlLoader,
+        )
 
         if not self.is_recursive:
             self.params["max_depth"] = 1
 
-        return RecursiveUrlLoader(self.url, **self.params)
+        parameters = self.get_optional_params()
+
+        return RecursiveUrlLoader(self.url, **parameters)
