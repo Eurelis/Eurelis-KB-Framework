@@ -82,7 +82,7 @@ class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
             document loader
 
         """
-        from langchain.document_loaders.generic import GenericLoader
+        from langchain_community.document_loaders.generic import GenericLoader
 
         arguments = self.get_optional_params()
         self._process_parser_data(context, arguments)

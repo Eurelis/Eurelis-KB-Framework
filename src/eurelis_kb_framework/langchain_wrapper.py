@@ -424,6 +424,7 @@ class LangchainWrapper(BaseContext):
         expected_docs_by_source: int = 1,
         single_doc_by_source: bool = True,
         source_mean_embedding_method: DOCUMENT_MEAN_EMBEDDING = "default",
+        coefs: Optional[list[float]] = None,
     ) -> List[Tuple[Document, float]]:
         """
         Method to get suggestions
@@ -451,11 +452,29 @@ class LangchainWrapper(BaseContext):
 
             if embedding:
                 embeddings.append(embedding)
-
         if not embeddings:
             return []
 
-        mean_embedding = np.mean(np.array(embeddings), axis=0).tolist()
+        if not coefs:
+            mean_embedding = np.mean(np.array(embeddings), axis=0).tolist()
+        else:
+            coefs = coefs.copy()
+            # get the same number of coefs and embeddings
+            if len(coefs) < len(embeddings):
+                embeddings = embeddings[: len(coefs)]
+            elif len(coefs) > len(embeddings):
+                coefs = coefs[: len(embeddings)]
+
+            numpy_coeffs = np.array(coefs)
+            coef_sum = np.sum(numpy_coeffs)
+
+            embeddings_np = np.array(embeddings)
+
+            embeddings_ponderate = embeddings_np * numpy_coeffs[:, None]
+            embeddings_sum = np.sum(embeddings_ponderate, axis=0)
+
+            mean_embedding = embeddings_sum / coef_sum
+            mean_embedding = list(mean_embedding)
 
         # get the docs nearest to the mean embedding
         k_search_documents = (
