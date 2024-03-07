@@ -53,24 +53,30 @@ class MongoDBVectorStoreFactory(ParamsDictFactory[VectorStore]):
 
         other_params = self.get_optional_params()
 
-        version_array = mongo_client.server_info()["versionArray"]
-        if version_array[0] >= 7:
-            search_index = {
-                "name": other_params.get("index_name"),
-                "definition": {
-                    "type": "vectorSearch",
-                    "fields": [
-                        {
-                            "numDimensions": len(context.embeddings.embed_query("")),
-                            "path": other_params.get("embedding_key"),
-                            "similarity": "cosine",
-                            "type": "vector",
-                        }
-                    ],
-                },
-            }
-
-            collection.create_search_index(search_index)
+        #
+        # FIXME
+        # VLA - le 07/03/2024
+        # This part of the code is commented because it is not working
+        # An error is raised when trying to create the search index
+        # pymongo.errors.OperationFailure: command not found, full error: {'ok': 0, 'errmsg': 'command not found', 'code': 59, 'codeName': 'CommandNotFound'}
+        #
+        # version_array = mongo_client.server_info()["versionArray"]
+        # if version_array[0] >= 7:
+        #     search_index = {
+        #         "name": other_params.get("index_name"),
+        #         "definition": {
+        #             "type": "vectorSearch",
+        #             "fields": [
+        #                 {
+        #                     "numDimensions": len(context.embeddings.embed_query("")),
+        #                     "path": other_params.get("embedding_key"),
+        #                     "similarity": "cosine",
+        #                     "type": "vector",
+        #                 }
+        #             ],
+        #         },
+        #     }
+        #     collection.create_search_index(search_index)
 
         return MongoDBSimilarityAtlasVectorStoreSearch(
             collection, context.embeddings, **other_params
