@@ -1,4 +1,4 @@
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Callable
 
 from langchain.schema import Document
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
@@ -8,6 +8,19 @@ class MongoDBSimilarityAtlasVectorStoreSearch(MongoDBAtlasVectorSearch):
     """
     Class to enable similarity search with score on mongodb
     """
+
+    def _select_relevance_score_fn(self) -> Callable[[float], float]:
+        """
+        The 'correct' relevance function
+        may differ depending on a few things, including:
+        - the distance / similarity metric used by the VectorStore
+        - the scale of your embeddings (OpenAI's are unit normed. Many others are not!)
+        - embedding dimensionality
+        - etc.
+        Vectorstores should define their own selection based method of relevance.
+        """
+        # override default implementation which is buggy
+        return lambda x: x
 
     def add_documents(self, documents: List[Document], **kwargs: Any) -> List[str]:
         """Run more documents through the embeddings and add to the vectorstore.
