@@ -1,3 +1,6 @@
+#
+# gmake
+#
 SHELL := /bin/bash
 CHDIR_SHELL := $(SHELL)
 
