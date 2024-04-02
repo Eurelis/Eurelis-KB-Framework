@@ -87,7 +87,7 @@ class Dataset(BaseLoader):
         return self._text_template
 
     def has_template(self) -> bool:
-        return bool(self.text_template)
+        return bool(self._text_template)
 
     def apply_text_template(self, doc: Document):
         substitute_dict = cast(Mapping[str, object], TemplateTextDocWrapper(doc))

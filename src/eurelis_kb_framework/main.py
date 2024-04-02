@@ -5,7 +5,7 @@ import click
 from eurelis_kb_framework.output import Verbosity
 
 if TYPE_CHECKING:
-    from eurelis_kb_framework.langchain_wrapper import LangchainWrapper, BaseContext
+    from eurelis_kb_framework.langchain_wrapper import LangchainWrapper
 
 
 @click.group()
@@ -26,9 +26,10 @@ def cli(ctx, **kwargs):
     # singleton method to instantiate the LangchainWrapper
     def wrapper() -> "LangchainWrapper":
         instance = getattr(wrapper, "instance")
-        if instance:
+        if not instance:
             # Get and prepare the factory
             from eurelis_kb_framework import LangchainWrapperFactory
+            from eurelis_kb_framework.langchain_wrapper import BaseContext
 
             factory = LangchainWrapperFactory()
 

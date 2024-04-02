@@ -14,7 +14,7 @@ from eurelis_kb_framework.types import FACTORY
 from eurelis_kb_framework.utils import parse_param_value
 
 if TYPE_CHECKING:
-    from eurelis_kb_framework.langchain_wrapper import BaseContext, LangchainWrapper
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class DatasetFactory(ParamsDictFactory[Dataset]):
@@ -149,6 +149,8 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
             a dataset instance
 
         """
+        from eurelis_kb_framework.langchain_wrapper import LangchainWrapper
+
         if not isinstance(context, LangchainWrapper):
             raise ValueError(
                 "DatasetFactory should be used with LangchainWrapper instance as context"

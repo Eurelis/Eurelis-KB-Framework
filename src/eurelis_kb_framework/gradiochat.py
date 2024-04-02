@@ -69,7 +69,9 @@ def define_chatbot(wrapper, selfcheck: bool = False):
             memory["documents"] = []
             memory["selfcheck"] = None
             chain = getattr(define_chatbot, "chain")
-            chain_answer = chain(history[-1][0], callbacks=define_chatbot.callbacks)
+            chain_answer = chain.invoke(
+                history[-1][0], {"callbacks": getattr(define_chatbot, "callbacks")}
+            )
 
             if selfcheck:
                 memory["selfcheck"] = chain_answer.get("selfcheck")

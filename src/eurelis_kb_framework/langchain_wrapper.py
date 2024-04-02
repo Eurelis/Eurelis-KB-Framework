@@ -168,6 +168,10 @@ class LangchainWrapper(BaseContext):
                 self.console.critical_print(f"Error parsing config file: {e}")
                 return
 
+            self.opt_project = parse_param_value(
+                config.get("project", "knowledge_base")
+            )
+
             self._parse_embeddings(config.get("embeddings"))
             self._parse_vector_store(config.get("vectorstore"))
 
@@ -177,9 +181,6 @@ class LangchainWrapper(BaseContext):
             self.llm_factory = config.get("llm")
             self.chain_factory = config.get("chain", {})
 
-            self.opt_project = parse_param_value(
-                config.get("project", "knowledge_base")
-            )
             self.opt_record_manager_db_url = parse_param_value(
                 config.get("record_manager", "sqlite:///record_manager_cache.sql")
             )
@@ -853,14 +854,15 @@ class LangchainWrapper(BaseContext):
         self.ensure_initialized()
 
         chain_factory = self.chain_factory
-        if not chain_factory and not kwargs:
-            raise ValueError("No data provided to build chain")
 
         # if chain factory is a string, it is the qualified name of a factory
+
         if isinstance(chain_factory, str):
             chain_args = {"factory": chain_factory, **kwargs}
         elif isinstance(chain_factory, dict):
             chain_args = {**chain_factory, **kwargs}
+        else:
+            chain_args = {}
 
         chain = LangchainWrapper.get_instance_from_factory(
             self, DefaultFactories.CHAIN, chain_args, mandatory=True

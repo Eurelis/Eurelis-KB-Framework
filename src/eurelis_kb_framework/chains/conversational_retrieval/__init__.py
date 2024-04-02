@@ -16,7 +16,6 @@ from eurelis_kb_framework.base_factory import (
 from eurelis_kb_framework.types import FACTORY
 
 if TYPE_CHECKING:
-    from eurelis_kb_framework.langchain_wrapper import LangchainWrapper
     from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
@@ -53,10 +52,10 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
             self.condense_question_llm_factory = value.copy()
         elif isinstance(value, str):
             self.condense_question_llm_factory = value
-
-        raise ValueError(
-            "condense_question_llm parameter is expected to be a factory (str ou dict)"
-        )
+        else:
+            raise ValueError(
+                f"condense_question_llm parameter is expected to be a factory (str ou dict), got {value} {type(value)}"
+            )
 
     def set_condense_question_prompt(self, value: Union[str, list]):
         value = _extract_list_or_string(value)
@@ -124,10 +123,11 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
             langchain chain
         """
         from langchain.chains import ConversationalRetrievalChain
+        from eurelis_kb_framework.langchain_wrapper import LangchainWrapper
 
         if not isinstance(context, LangchainWrapper):
             raise RuntimeError(
-                "ConversationalRetrievalChain must be used with a langchainwrapper as context"
+                "ConversationalRetrievalChain must be used with a LangchainWrapper instance as context"
             )
 
         memory = None
@@ -160,13 +160,13 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
         if self.combine_docs_chain_kwargs:
             other_args["combine_docs_chain_kwargs"] = self.combine_docs_chain_kwargs
         if self.condense_question_llm_factory:
-            other_args["condense_question_llm"] = (
-                context.__class__.get_instance_from_factory(
-                    context,
-                    DefaultFactories.LLM,
-                    self.condense_question_llm_factory,
-                    mandatory=True,
-                )
+            other_args[
+                "condense_question_llm"
+            ] = context.__class__.get_instance_from_factory(
+                context,
+                DefaultFactories.LLM,
+                self.condense_question_llm_factory,
+                mandatory=True,
             )
 
         # build and return the chain
