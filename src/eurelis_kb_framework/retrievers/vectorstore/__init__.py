@@ -23,5 +23,8 @@ class VectorStoreRetrieverFactory(BaseFactory[BaseRetriever]):
         """
         self.retriever_kwargs = kwargs if kwargs else {}
 
-    def build(self, context: "BaseContext") -> T:
+    def build(self, context: "BaseContext") -> BaseRetriever:
+        if context.vector_store is None:
+            raise ValueError("context object does not contain a vector_store")
+
         return context.vector_store.as_retriever(**self.retriever_kwargs)

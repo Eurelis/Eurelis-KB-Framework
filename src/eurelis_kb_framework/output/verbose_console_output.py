@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Sequence
 
 from eurelis_kb_framework.output.base_console_output import BaseConsoleOutput
 
@@ -33,7 +33,9 @@ class VerboseConsoleOutput(BaseConsoleOutput):
         """
         return self.status(msg, handler)
 
-    def verbose_print_table(self, items, columns: List[str], row_extractor, **kwargs):
+    def verbose_print_table(
+        self, items, columns: Sequence[str], row_extractor, **kwargs
+    ):
         """
         Print table method, will create a table and print it them
         Args:

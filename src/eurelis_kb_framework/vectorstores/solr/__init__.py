@@ -25,8 +25,13 @@ class SolrFactory(ParamsDictFactory[VectorStore]):
         Returns:
             a Solr vector store object
         """
-        from eurelis_langchain_solr_vectorstore import Solr
+        try:
+            from eurelis_langchain_solr_vectorstore import Solr  # type: ignore
 
-        context.console.verbose_print(f"Getting solr vector store")
+            context.console.verbose_print(f"Getting solr vector store")
 
-        return Solr(context.embeddings, core_kwargs=self.get_optional_params())
+            return Solr(context.embeddings, core_kwargs=self.get_optional_params())
+        except ImportError:
+            raise ImportError(
+                "Please install eurelis_langchain_solr_vectorstore with the option solr, (pip install eurelis_kb_framework[solr]"
+            )

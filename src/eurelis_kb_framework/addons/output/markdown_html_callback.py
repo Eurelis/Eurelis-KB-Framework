@@ -41,7 +41,7 @@ class MarkdownHtmlCallback(BaseCallbackHandler):
 
         # we need to ensure we are on the root chain end call
         if parent_run_id is None and self._input_field in outputs:  # last chain_end
-            import markdown
+            import markdown  # type: ignore[import-untyped]
 
             # extract the Markdown value
             markdown_txt = outputs.get(self._input_field)

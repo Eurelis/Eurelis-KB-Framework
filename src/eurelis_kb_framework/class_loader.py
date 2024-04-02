@@ -132,13 +132,28 @@ class ClassLoader:
 
         """
         # extract class name and arguments
-        qualified_class = class_dict.pop("class")
-        args = class_dict.pop("args", list())
-        kwargs = class_dict.pop("kwargs", dict())
+        qualified_class = class_dict.get("class")
+        args = class_dict.get("args", list())
+        kwargs = class_dict.get("kwargs", dict())
 
         if not qualified_class:
             raise ValueError(
                 f"missing class attribute in {class_dict} instance definition"
+            )
+
+        if not isinstance(qualified_class, str):
+            raise ValueError(
+                f"class attribute should be a string, {qualified_class} ({type(qualified_class)}) given"
+            )
+
+        if not isinstance(args, list):
+            raise ValueError(
+                f"args attribute should be a list {args} ({type(args)}) given"
+            )
+
+        if not isinstance(kwargs, dict):
+            raise ValueError(
+                f"kwargs attribute should be a dictionnary {kwargs} ({type(kwargs)}) given"
             )
 
         # delegate the instantiation
@@ -228,6 +243,21 @@ class ClassLoader:
         if not qualified_class:
             raise ValueError(
                 f"empty factory attribute in {factory_dict} instance definition"
+            )
+
+        if not isinstance(qualified_class, str):
+            raise ValueError(
+                f"class attribute should be a string, {qualified_class} ({type(qualified_class)}) given"
+            )
+
+        if not isinstance(args, list):
+            raise ValueError(
+                f"args attribute should be a list {args} ({type(args)}) given"
+            )
+
+        if not isinstance(kwargs, dict):
+            raise ValueError(
+                f"kwargs attribute should be a dictionnary {kwargs} ({type(kwargs)}) given"
             )
 
         instance = cast(

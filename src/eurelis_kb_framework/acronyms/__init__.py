@@ -8,7 +8,7 @@ from eurelis_kb_framework.base_factory import ParamsDictFactory
 from eurelis_kb_framework.text_transformers import TextTransformer
 
 if TYPE_CHECKING:
-    from eurelis_kb_framework import BaseContext
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class AcronymsTextTransformerFactory(ParamsDictFactory[TextTransformer]):

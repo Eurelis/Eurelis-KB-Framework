@@ -2,13 +2,32 @@ import json
 import os.path
 from pathlib import Path
 from string import Template
-from typing import List, Iterator, Iterable, Optional, cast, Mapping, Callable
+from typing import (
+    List,
+    Iterator,
+    Iterable,
+    Optional,
+    cast,
+    Mapping,
+    Callable,
+    TYPE_CHECKING,
+    Any,
+    Union,
+)
 
 from langchain.document_loaders.base import BaseLoader
 from langchain.schema import Document, BaseDocumentTransformer
 from langchain.text_splitter import TextSplitter
 
 from eurelis_kb_framework.base_factory import JSON
+from eurelis_kb_framework.document_transformers.base import (
+    BaseIteratorDocumentTransformer,
+)
+from eurelis_kb_framework.types import PARAMS
+
+if TYPE_CHECKING:
+    from langchain.schema.vectorstore import VectorStore
+    from langchain.schema.embeddings import Embeddings
 
 
 class TemplateTextDocWrapper:
@@ -38,25 +57,34 @@ class Dataset(BaseLoader):
         """
         self.id = dataset_id
         self.loader = loader
-        self.splitter = None
-        self.transformer = None
-        self.output_folder = None
+        self.splitter: Optional[TextSplitter] = None
+        self.transformer: Optional[
+            Union[BaseDocumentTransformer, BaseIteratorDocumentTransformer]
+        ] = None
+        self.output_folder: Optional[str] = None
         self.output_file_varname = "id"
-        self.index = True
+        self.index: Union[bool, str, PARAMS] = True
         self.cleanup = None
         self.source_id_key = "source"
         self.name = dataset_id
-        self.vector_store = None
-        self.embeddings = None
-        self.metadata = None
-        self.text_template: Optional[Template] = None
+        self.vector_store: Optional["VectorStore"] = None
+        self.embeddings: Optional["Embeddings"] = None
+        self.metadata: Optional[Mapping[str, Any]] = None
+        self._text_template: Optional[Template] = None
 
     def set_text_template(self, value: str):
         """Setter for the text_template
         Args:
             value (str): the value
         """
-        self.text_template = Template(value)
+        self._text_template = Template(value)
+
+    @property
+    def text_template(self) -> Template:
+        if not self._text_template:
+            raise RuntimeError("Text template was not given")
+
+        return self._text_template
 
     def has_template(self) -> bool:
         return bool(self.text_template)
@@ -65,7 +93,7 @@ class Dataset(BaseLoader):
         substitute_dict = cast(Mapping[str, object], TemplateTextDocWrapper(doc))
         doc.page_content = self.text_template.safe_substitute(substitute_dict)
 
-    def set_splitter(self, splitter: TextSplitter):
+    def set_splitter(self, splitter: "TextSplitter"):
         """
         Setter for the splitter
         Args:
@@ -76,7 +104,7 @@ class Dataset(BaseLoader):
         """
         self.splitter = splitter
 
-    def set_transformer(self, transformer: BaseDocumentTransformer):
+    def set_transformer(self, transformer: "BaseDocumentTransformer"):
         """
         Setter for the transformer
         Args:
@@ -122,7 +150,7 @@ class Dataset(BaseLoader):
         """
         self.output_file_varname = varname
 
-    def set_metadata(self, metadata: dict):
+    def set_metadata(self, metadata: Mapping[str, Any]):
         """
         Setter for metadata variable
         Args:
@@ -190,12 +218,22 @@ class Dataset(BaseLoader):
         Returns:
 
         """
+        if not self.output_folder:
+            raise RuntimeError(
+                "Unable to write document as cache, no output_folder provided"
+            )
+
         json_doc = {
             "page_content": document.page_content,
             "metadata": document.metadata,
         }
 
         relative_path = document.metadata.get(self.output_file_varname)
+
+        if not isinstance(relative_path, str):
+            raise RuntimeError(
+                f"Invalid metadata value to build cache path, expected string got {relative_path} ({type(relative_path)}"
+            )
 
         if self.splitter:
             relative_path += f"-{document.metadata.get('start_index', 0)}"
@@ -217,7 +255,7 @@ class Dataset(BaseLoader):
         with open(cache_path, "w") as json_file:
             json.dump(json_doc, json_file)
 
-    def _lazy_load_transformer(self) -> Iterator[Document]:
+    def _lazy_load_transformer(self) -> Iterable[Document]:
         """
         Helper method to get an iterator over transformed documents
         Returns:
@@ -225,24 +263,28 @@ class Dataset(BaseLoader):
         """
 
         # first we get documents from the loader
+        documents: Iterable[Document]
         try:
             documents = self.loader.lazy_load()
         except NotImplementedError:
             documents = self.loader.load()
 
-        if not self.transformer and not self.metadata:  # if no transformer was defined
+        metadata = self.metadata
+        transformer = self.transformer
+
+        if not transformer and not metadata:  # if no transformer was defined
             yield from documents
-        elif not self.transformer:
+        elif not transformer and metadata:
             for doc in documents:
-                doc.metadata.update(self.metadata)
+                doc.metadata.update(metadata)
                 yield doc
-        elif self.metadata:
+        elif metadata and transformer:
             for doc in documents:  # for each document we proceed to transformation
-                doc.metadata.update(self.metadata)
-                yield from self.transformer.transform_documents([doc])
-        else:
+                doc.metadata.update(metadata)
+                yield from transformer.transform_documents([doc])
+        elif transformer:
             for doc in documents:  # for each document we proceed to transformation
-                yield from self.transformer.transform_documents([doc])
+                yield from transformer.transform_documents([doc])
 
     def _lazy_load_splitter(self) -> Iterator[Document]:
         """

@@ -1,6 +1,11 @@
+from typing import TYPE_CHECKING, cast
+
 import click
 
 from eurelis_kb_framework.output import Verbosity
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import LangchainWrapper, BaseContext
 
 
 @click.group()
@@ -20,7 +25,8 @@ def cli(ctx, **kwargs):
 
     # singleton method to instantiate the LangchainWrapper
     def wrapper() -> "LangchainWrapper":
-        if not wrapper.instance:
+        instance = getattr(wrapper, "instance")
+        if instance:
             # Get and prepare the factory
             from eurelis_kb_framework import LangchainWrapperFactory
 
@@ -34,8 +40,12 @@ def cli(ctx, **kwargs):
             if "config" in kwargs and kwargs["config"]:
                 factory.set_config_path(kwargs["config"])
 
-            wrapper.instance = factory.build(None)
-        return wrapper.instance
+            instance = factory.build(
+                cast(BaseContext, None)
+            )  # casting None to BaseContext is wanted
+            setattr(factory, "instance", instance)
+
+        return instance
 
     wrapper.instance = None
     ctx.obj["singleton"] = wrapper

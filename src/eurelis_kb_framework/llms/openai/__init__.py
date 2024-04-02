@@ -31,11 +31,17 @@ class ChatOpenAIFactory(ParamsDictFactory[BaseLLM]):
     }
 
     def build(self, context: "BaseContext") -> BaseChatModel:
-        from langchain_openai import ChatOpenAI
+        try:
+            from langchain_openai import ChatOpenAI  # type: ignore
 
-        arguments = self.get_optional_params()
+            arguments = self.get_optional_params()
 
-        return ChatOpenAI(**arguments)
+            return ChatOpenAI(**arguments)  # type: ignore
+
+        except ImportError:
+            raise ImportError(
+                "Please install langchain_openai with the option openai, (pip install eurelis_kb_framework[openai]"
+            )
 
 
 class OpenAIFactory(ParamsDictFactory[BaseLLM]):
@@ -68,11 +74,17 @@ class OpenAIFactory(ParamsDictFactory[BaseLLM]):
     }
 
     def build(self, context: "BaseContext") -> BaseLLM:
-        from langchain_openai import OpenAI
+        try:
+            from langchain_openai import OpenAI  # type: ignore
 
-        arguments = self.get_optional_params()
+            arguments = self.get_optional_params()
 
-        return OpenAI(**arguments)
+            return OpenAI(**arguments)  # type: ignore[arg-type]
+
+        except ImportError:
+            raise ImportError(
+                "Please install langchain_openai with the option openai, (pip install eurelis_kb_framework[openai]"
+            )
 
 
 class GenericOpenAIFactory(ProviderFactory[BaseLLM]):

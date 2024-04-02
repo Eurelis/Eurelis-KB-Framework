@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Optional
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema import BaseMessage
@@ -15,12 +15,14 @@ class ChatChecker:
     ) -> list[str]:
         return [self.chat_model(messages).content for _ in range(samples)]
 
-    def check(self, input: CheckInput, method: Method = Method.NLI) -> dict[str, Any]:
+    def check(
+        self, input: CheckInput, method: Optional[Method] = Method.NLI
+    ) -> dict[str, Any]:
         if method == Method.MQAG:
             raise NotImplementedError
 
-        import torch
-        from selfcheckgpt.modeling_selfcheck import (
+        import torch  # type: ignore[import-not-found]
+        from selfcheckgpt.modeling_selfcheck import (  # type: ignore[import-not-found]
             # SelfCheckMQAG,
             SelfCheckBERTScore,
             SelfCheckNgram,

@@ -1,9 +1,12 @@
-from typing import Sequence, Any, TYPE_CHECKING
+from typing import Sequence, Any, TYPE_CHECKING, Iterator, Iterable
 from urllib.parse import urlparse, ParseResult
 
 from langchain.schema import BaseDocumentTransformer, Document
 
 from eurelis_kb_framework.base_factory import BaseFactory
+from eurelis_kb_framework.document_transformers.base import (
+    BaseIteratorDocumentTransformer,
+)
 
 if TYPE_CHECKING:
     from eurelis_kb_framework.langchain_wrapper import BaseContext
@@ -29,7 +32,7 @@ def _strip_scheme(url: str) -> str:
     return without_scheme.strip("/")  # apple.com
 
 
-class UrlOutputTransformer(BaseDocumentTransformer):
+class UrlOutputTransformer(BaseIteratorDocumentTransformer):
     def __init__(
         self, url_source_field: str = "source", path_output_field: str = "source_output"
     ):
@@ -37,8 +40,8 @@ class UrlOutputTransformer(BaseDocumentTransformer):
         self._path_output_field = path_output_field
 
     def transform_documents(
-        self, documents: Sequence[Document], **kwargs: Any
-    ) -> Sequence[Document]:
+        self, documents: Iterable[Document], **kwargs: Any
+    ) -> Iterable[Document]:
         """Add a new metadata field containing a relative path given a source url.
 
         This method will extract the url from the document metadata, then remove its scheme and add it back to metadata
@@ -55,6 +58,10 @@ class UrlOutputTransformer(BaseDocumentTransformer):
 
         for doc in documents:
             source_url = doc.metadata.get(self._url_source_field)
+            if not isinstance(source_url, str):
+                raise ValueError(
+                    f"Invalid source url metadata, expected a string got {source_url} ({type(source_url)}"
+                )
             doc.metadata[self._path_output_field] = _strip_scheme(
                 source_url
             )  # remove leading https/http/ftp...
@@ -62,8 +69,8 @@ class UrlOutputTransformer(BaseDocumentTransformer):
             yield doc
 
     async def atransform_documents(
-        self, documents: Sequence[Document], **kwargs: Any
-    ) -> Sequence[Document]:
+        self, documents: Iterable[Document], **kwargs: Any
+    ) -> Iterable[Document]:
         """Asynchronously add a new metadata field containing a relative path given a source url.
 
         This method isn't implemented
@@ -75,7 +82,7 @@ class UrlOutputTransformer(BaseDocumentTransformer):
         raise NotImplementedError
 
 
-class UrlOutputTransformerFactory(BaseFactory[BaseDocumentTransformer]):
+class UrlOutputTransformerFactory(BaseFactory[BaseIteratorDocumentTransformer]):
     """
     Factory for the UrlOutputTransformer
     It is used to convert a metadata source value containing an url, to a source_output value containing a relative path
@@ -86,7 +93,7 @@ class UrlOutputTransformerFactory(BaseFactory[BaseDocumentTransformer]):
     It is mostly used for caching
     """
 
-    def build(self, context: "BaseContext") -> BaseDocumentTransformer:
+    def build(self, context: "BaseContext") -> BaseIteratorDocumentTransformer:
         """
         Construct the UrlOutputTransformer
         Args:

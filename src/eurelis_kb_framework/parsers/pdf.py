@@ -26,7 +26,7 @@ class PdfFileParser(BaseBlobParser):
         :param blob:
         :return:
         """
-        from pypdf import PdfReader
+        from pypdf import PdfReader  # type: ignore[import-not-found]
 
         metadata = {
             "source": str(os.path.relpath(blob.path, self._base_path)),

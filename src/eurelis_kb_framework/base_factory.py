@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Generic, TypeVar, Collection, TYPE_CHECKING, cast
+from typing import Generic, TypeVar, Collection, TYPE_CHECKING, cast, Mapping, Union
 
 from eurelis_kb_framework.types import PARAMS, JSON
 from eurelis_kb_framework.utils import parse_param_value
@@ -145,7 +145,7 @@ class ProviderFactory(ParamsDictFactory, Generic[T]):
     Base factory used to delegate work to another factory given a 'provider' parameter
     """
 
-    ALLOWED_PROVIDERS = dict()
+    ALLOWED_PROVIDERS: Mapping[str, Union[type, str]] = dict()
 
     def _get_provider(self, context) -> BaseFactory[T]:
         """
@@ -182,6 +182,8 @@ class ProviderFactory(ParamsDictFactory, Generic[T]):
             return cast(
                 BaseFactory[T], context.loader.instantiate_class("", provider_class)
             )  # we use the class loader to instantiate it, no default module name
+
+        raise RuntimeError("Unable to found provider class factory")
 
     def build(self, context: "BaseContext") -> T:
         """

@@ -1,11 +1,14 @@
-from typing import Optional, Sequence, Any
+from typing import Optional, Sequence, Any, Union, Iterable
 
 from langchain.schema import BaseDocumentTransformer, Document
 
 from eurelis_kb_framework.acronyms import AcronymsTextTransformer
+from eurelis_kb_framework.document_transformers.base import (
+    BaseIteratorDocumentTransformer,
+)
 
 
-class AcronymsDocumentTransformer(BaseDocumentTransformer):
+class AcronymsDocumentTransformer(BaseIteratorDocumentTransformer):
     """
     Acronyms document transformer, document transformer performing an acronyms transformation
     """
@@ -13,7 +16,9 @@ class AcronymsDocumentTransformer(BaseDocumentTransformer):
     def __init__(
         self,
         acronyms: AcronymsTextTransformer,
-        chain_transformer: Optional[BaseDocumentTransformer] = None,
+        chain_transformer: Optional[
+            Union[BaseDocumentTransformer, BaseIteratorDocumentTransformer]
+        ] = None,
     ):
         """
         Initializer
@@ -27,8 +32,8 @@ class AcronymsDocumentTransformer(BaseDocumentTransformer):
         self.chain = chain_transformer
 
     def transform_documents(
-        self, documents: Sequence[Document], **kwargs: Any
-    ) -> Sequence[Document]:
+        self, documents: Iterable[Document], **kwargs: Any
+    ) -> Iterable[Document]:
         """
         Transform documents implementation
         """
@@ -51,6 +56,6 @@ class AcronymsDocumentTransformer(BaseDocumentTransformer):
                 yield new_doc
 
     async def atransform_documents(
-        self, documents: Sequence[Document], **kwargs: Any
-    ) -> Sequence[Document]:
+        self, documents: Iterable[Document], **kwargs: Any
+    ) -> Iterable[Document]:
         raise NotImplementedError

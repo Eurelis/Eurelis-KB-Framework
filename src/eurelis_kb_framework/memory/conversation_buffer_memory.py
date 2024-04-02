@@ -1,6 +1,11 @@
+from typing import TYPE_CHECKING
+
 from langchain.schema import BaseMemory
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
+
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class ConversationBufferMemoryFactory(ParamsDictFactory[BaseMemory]):
@@ -29,4 +34,4 @@ class ConversationBufferMemoryFactory(ParamsDictFactory[BaseMemory]):
 
         from langchain.memory import ConversationBufferMemory
 
-        return ConversationBufferMemory(**params)
+        return ConversationBufferMemory(**params)  # type: ignore[arg-type]

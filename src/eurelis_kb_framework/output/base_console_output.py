@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Sequence
 
 from rich.console import Console
 
@@ -84,7 +84,7 @@ class BaseConsoleOutput(Output):
         """
         return handler()
 
-    def print_table(self, items, columns: List[str], row_extractor, **kwargs):
+    def print_table(self, items, columns: Sequence[str], row_extractor, **kwargs):
         """
         Print table method, will create a table and print it them
         Args:
@@ -112,7 +112,9 @@ class BaseConsoleOutput(Output):
 
         self.console.print(table)
 
-    def verbose_print_table(self, items, columns: List[str], row_extractor, **kwargs):
+    def verbose_print_table(
+        self, items, columns: Sequence[str], row_extractor, **kwargs
+    ):
         """
         Print table method, will create a table and print it them, does nothing in the base version
         Args:

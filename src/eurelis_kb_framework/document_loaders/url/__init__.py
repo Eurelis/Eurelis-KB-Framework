@@ -86,4 +86,4 @@ class UrlLoaderFactory(ParamsDictFactory[BaseLoader]):
 
         parameters = self.get_optional_params()
 
-        return RecursiveUrlLoader(self.url, **parameters)
+        return RecursiveUrlLoader(self.url, **parameters)  # type: ignore[arg-type]
