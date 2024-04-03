@@ -1,11 +1,8 @@
-from typing import TYPE_CHECKING, Mapping, Union
+from typing import Mapping, Union
 
 from langchain.schema.embeddings import Embeddings
 
 from eurelis_kb_framework.base_factory import ProviderFactory
-
-if TYPE_CHECKING:
-    pass
 
 
 class GenericEmbeddingsFactory(ProviderFactory[Embeddings]):
