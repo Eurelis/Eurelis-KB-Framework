@@ -13,7 +13,15 @@ class SolrFactory(ParamsDictFactory[VectorStore]):
     Factory to get a solr based vector store
     """
 
-    OPTIONAL_PARAMS = {"page_content_field", "vector_field", "core_name", "url_base"}
+    OPTIONAL_PARAMS = {
+        "page_content_field",
+        "vector_field",
+        "core_name",
+        "url_base",
+        "query_handler",
+        "update_handler",
+        "metadata_fields"
+    }
 
     def build(self, context: "BaseContext") -> VectorStore:
         """
@@ -29,4 +37,6 @@ class SolrFactory(ParamsDictFactory[VectorStore]):
 
         context.console.verbose_print(f"Getting solr vector store")
 
-        return Solr(context.embeddings, core_kwargs=self.get_optional_params())
+        core_kwargs = self.get_optional_params()
+
+        return Solr(context.embeddings, core_kwargs=core_kwargs)
