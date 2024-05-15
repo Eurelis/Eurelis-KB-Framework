@@ -1,7 +1,10 @@
+#
+# gmake
+#
 SHELL := /bin/bash
 CHDIR_SHELL := $(SHELL)
 
-PYTHON := python
+PYTHON := python3.11
 
 #
 # Setup
@@ -26,7 +29,12 @@ install-pylint: update-venv
 	@source .venv/bin/activate &&\
 	pip install pylint
 
-init-project: update-venv install-black install-pylint
+install-mypy: update-venv
+	@echo "***** $@"
+	@source .venv/bin/activate &&\
+	pip install mypy
+
+init-project: update-venv install-black install-pylint install-mypy
 
 #
 # Build
@@ -47,3 +55,10 @@ package-upload: package-build
 	@source .venv/bin/activate &&\
 	pip install --upgrade twine &&\
 	twine upload --repository pypi dist/*
+
+#
+# Cleaning
+#
+clean:
+	@echo "***** $@"
+	@source .venv/bin/activate && black src && mypy src

@@ -12,6 +12,13 @@ if TYPE_CHECKING:
 
 class SelfQueryRetrieverFactory(ParamsDictFactory[BaseRetriever]):
     def build(self, context: "BaseContext") -> BaseRetriever:
+        from eurelis_kb_framework.langchain_wrapper import LangchainWrapper
+
+        if not isinstance(context, LangchainWrapper):
+            raise RuntimeError(
+                "SelfQueryRetrieverFactory requires a LangchainWrapper instance as build context"
+            )
+
         llm = context.__class__.get_instance_from_factory(
             context, DefaultFactories.LLM, self.params.get("llm"), mandatory=True
         )

@@ -10,6 +10,6 @@ class CheckInput:
 
     @property
     def sentences(self):
-        from nltk.tokenize import sent_tokenize
+        from nltk.tokenize import sent_tokenize  # type: ignore[import-not-found]
 
         return [sent.strip() for sent in sent_tokenize(self.answer)]

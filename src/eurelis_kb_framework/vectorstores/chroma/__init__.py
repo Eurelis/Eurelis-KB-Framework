@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-import chromadb
+import chromadb  # type: ignore[import-not-found]
 from chromadb import API
 from langchain.schema.vectorstore import VectorStore
 from langchain_community.vectorstores import Chroma

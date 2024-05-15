@@ -1,7 +1,7 @@
 import inspect
 import logging
 import sys
-from typing import List
+from typing import List, Sequence
 
 from eurelis_kb_framework.output.output import Output
 
@@ -28,7 +28,7 @@ class LoggingConsoleOutput(Output):
     def _get_logger() -> logging.Logger:
         frame = sys._getframe(3)
         module = inspect.getmodule(frame)
-        return logging.getLogger(module.__name__)
+        return logging.getLogger(module.__name__ if module else __name__)
 
     def print(self, *args, **kwargs):
         """
@@ -99,7 +99,7 @@ class LoggingConsoleOutput(Output):
 
         return value
 
-    def print_table(self, items, columns: List[str], row_extractor, **kwargs):
+    def print_table(self, items, columns: Sequence[str], row_extractor, **kwargs):
         """
         Print table method, will create a table and print it them
         Args:
@@ -113,7 +113,9 @@ class LoggingConsoleOutput(Output):
         """
         pass
 
-    def verbose_print_table(self, items, columns: List[str], row_extractor, **kwargs):
+    def verbose_print_table(
+        self, items, columns: Sequence[str], row_extractor, **kwargs
+    ):
         """
         Print table method, will create a table and print it them, does nothing in the base version
         Args:

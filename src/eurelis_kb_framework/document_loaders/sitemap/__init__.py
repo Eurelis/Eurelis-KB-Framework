@@ -88,7 +88,7 @@ class SitemapDocumentLoaderFactory(ParamsDictFactory[BaseLoader]):
             ),
             meta_function=_meta_function,
             header_template=header_template,
-            **parameters,
+            **parameters,  # type: ignore[arg-type]
         )
 
         # hack as SitemapLoader does not override lazy_load from WebBaseLoader, we will force
@@ -96,6 +96,6 @@ class SitemapDocumentLoaderFactory(ParamsDictFactory[BaseLoader]):
         def lazy_load(instance):
             raise NotImplementedError("")
 
-        loader.lazy_load = types.MethodType(lazy_load, loader)
+        loader.lazy_load = types.MethodType(lazy_load, loader)  # type: ignore[method-assign]
 
         return loader

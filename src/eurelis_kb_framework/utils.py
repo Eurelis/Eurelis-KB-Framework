@@ -1,6 +1,7 @@
 import os
 from itertools import islice
 from string import Template
+from typing import Optional, Any
 
 
 def batched(iterable, n):
@@ -24,15 +25,15 @@ def batched(iterable, n):
         batch = tuple(islice(it, n))
 
 
-def parse_param_value(raw_value: str) -> str:
+def parse_param_value(raw_value: Optional[Any]) -> Optional[Any]:
     """
     Method to handle parameter values, will resolve environment variable values if needed
 
     Args:
-        raw_value (str): the raw parameter value from the configuration file
+        raw_value (Any, optional): the raw parameter value from the configuration file
 
     Returns:
-        parameter value (str), the final value to use
+        parameter value (Any, optional), the final value to use
 
     Raise:
         ValueError: If an environment variable value isn't found

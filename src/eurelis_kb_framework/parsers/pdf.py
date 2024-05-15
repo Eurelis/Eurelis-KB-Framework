@@ -1,7 +1,7 @@
 import os
 from typing import Iterator, TYPE_CHECKING
 
-from langchain.document_loaders import Blob
+from langchain_community.document_loaders import Blob
 from langchain.document_loaders.base import BaseBlobParser
 from langchain.schema import Document
 
@@ -26,7 +26,7 @@ class PdfFileParser(BaseBlobParser):
         :param blob:
         :return:
         """
-        from pypdf import PdfReader
+        from pypdf import PdfReader  # type: ignore[import-not-found]
 
         metadata = {
             "source": str(os.path.relpath(blob.path, self._base_path)),

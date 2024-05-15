@@ -15,6 +15,8 @@ from typing import (
     Tuple,
     Callable,
     Mapping,
+    TYPE_CHECKING,
+    Any,
 )
 
 import numpy as np
@@ -33,6 +35,10 @@ from eurelis_kb_framework.dataset.dataset import Dataset
 from eurelis_kb_framework.types import FACTORY, EMBEDDING, DOCUMENT_MEAN_EMBEDDING
 from eurelis_kb_framework.utils import parse_param_value, batched
 
+if TYPE_CHECKING:
+    from langchain.schema.embeddings import Embeddings
+    from langchain.schema.vectorstore import VectorStore
+
 
 class MetadataEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -50,18 +56,32 @@ class BaseContext(ABC):
     def __init__(self, class_loader: ClassLoader, console=None):
         self.loader = class_loader
         self.console = console
-        self.embeddings = None
-        self.vector_store = None
+        self.opt_embeddings: Optional["Embeddings"] = None
+        self.opt_vector_store: Optional["VectorStore"] = None
         self.is_verbose = False
 
     def copy_context(self) -> BaseContext:
         new_context = BaseContext(self.loader)
         new_context.console = self.console
-        new_context.embeddings = self.embeddings
-        new_context.vector_store = self.vector_store
+        new_context.opt_embeddings = self.opt_embeddings
+        new_context.opt_vector_store = self.opt_vector_store
         new_context.is_verbose = self.is_verbose
 
         return new_context
+
+    @property
+    def embeddings(self) -> "Embeddings":
+        if not self.opt_embeddings:
+            raise ValueError("No embeddings provided")
+
+        return self.opt_embeddings
+
+    @property
+    def vector_store(self) -> "VectorStore":
+        if not self.opt_vector_store:
+            raise ValueError("No vectorstore provided")
+
+        return self.opt_vector_store
 
 
 class LangchainWrapper(BaseContext):
@@ -69,7 +89,7 @@ class LangchainWrapper(BaseContext):
     Langchain wrapper, main class of the project
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Constructor
         """
@@ -77,15 +97,27 @@ class LangchainWrapper(BaseContext):
         self._datasets: Optional[OrderedDict] = None
         self._datasets_data: Optional[Union[List[dict], dict]] = None
         self.index_fn = None
-        self.project = None
-        self.record_manager_db_url = None
-        self.llm = None
-        self.llm_factory = None
-        self.chain_factory = None
-        self.vector_store_data = None
+        self.opt_project: Optional[str] = None
+        self.opt_record_manager_db_url: Optional[str] = None
+        self.llm: Optional[BaseLLM] = None
+        self.llm_factory: Optional[FACTORY] = None
+        self.chain_factory: Optional[FACTORY] = None
+        self.vector_store_data: Optional[FACTORY] = None
         self.is_initialized = False
         self._acronyms_data = None
         self._acronyms = None
+
+    @property
+    def project(self) -> str:
+        if not self.opt_project:
+            raise RuntimeError("project was not set")
+        return self.opt_project
+
+    @property
+    def record_manager_db_url(self) -> str:
+        if not self.opt_record_manager_db_url:
+            raise RuntimeError("record_manager was not set")
+        return self.opt_record_manager_db_url
 
     def ensure_initialized(self):
         """
@@ -136,6 +168,10 @@ class LangchainWrapper(BaseContext):
                 self.console.critical_print(f"Error parsing config file: {e}")
                 return
 
+            self.opt_project = parse_param_value(
+                config.get("project", "knowledge_base")
+            )
+
             self._parse_embeddings(config.get("embeddings"))
             self._parse_vector_store(config.get("vectorstore"))
 
@@ -145,8 +181,7 @@ class LangchainWrapper(BaseContext):
             self.llm_factory = config.get("llm")
             self.chain_factory = config.get("chain", {})
 
-            self.project = parse_param_value(config.get("project", "knowledge_base"))
-            self.record_manager_db_url = parse_param_value(
+            self.opt_record_manager_db_url = parse_param_value(
                 config.get("record_manager", "sqlite:///record_manager_cache.sql")
             )
 
@@ -195,7 +230,7 @@ class LangchainWrapper(BaseContext):
         """
         self.console.verbose_print(f"Reading embeddings from configuration file")
 
-        self.embeddings = LangchainWrapper.get_instance_from_factory(
+        self.opt_embeddings = LangchainWrapper.get_instance_from_factory(
             self, DefaultFactories.EMBEDDINGS, embeddings
         )
 
@@ -213,7 +248,7 @@ class LangchainWrapper(BaseContext):
 
         self.vector_store_data = vector_store
 
-        self.vector_store = LangchainWrapper.get_instance_from_factory(
+        self.opt_vector_store = LangchainWrapper.get_instance_from_factory(
             self, DefaultFactories.VECTORSTORE, vector_store, True
         )
 
@@ -346,7 +381,7 @@ class LangchainWrapper(BaseContext):
     def _build_search_args(
         self, k: int = 4, search_filter: Optional[dict[str, str]] = None
     ) -> dict:
-        search_args = {"k": k}
+        search_args: dict[str, Any] = {"k": k}
 
         import inspect
 
@@ -485,7 +520,7 @@ class LangchainWrapper(BaseContext):
         )
 
         # we remove from documents those corresponding to the given sources
-        documents = filter(
+        documents: Iterable[Tuple[Document, float]] = filter(
             lambda item: item[0].metadata.get(source_field) not in sources,
             search_documents,
         )
@@ -495,11 +530,12 @@ class LangchainWrapper(BaseContext):
             source_set = set()
 
             # ensure to have only the first document for a given source value
-            for doc in documents:
-                source = doc[0].metadata.get(source_field)
-                if source not in source_set:
-                    new_docs.append(doc)
-                    source_set.add(source)
+            for doc_relevance in documents:
+                doc, relevance = doc_relevance
+                doc_source = doc.metadata.get(source_field)
+                if doc_source not in source_set:
+                    new_docs.append(doc_relevance)
+                    source_set.add(doc_source)
 
             documents = new_docs
 
@@ -529,13 +565,23 @@ class LangchainWrapper(BaseContext):
 
         search_args = self._build_search_args(k, search_filter)
 
+        vector_store = self.vector_store
+        if include_relevance and not hasattr(
+            vector_store, "similarity_search_by_vector_with_relevance_scores"
+        ):
+            raise ValueError(
+                f"{type(vector_store)} does not implement similarity_search_by_vector_with_relevance_scores"
+            )
+
         search_method = (
-            self.vector_store.similarity_search
+            vector_store.similarity_search
             if not include_relevance
-            else self.vector_store.similarity_search_by_vector_with_relevance_scores
+            else getattr(
+                vector_store, "similarity_search_by_vector_with_relevance_scores"
+            )
         )
 
-        documents = search_method(vector, **search_args)
+        documents = search_method(vector, **search_args) if search_method else []
 
         return documents
 
@@ -678,7 +724,7 @@ class LangchainWrapper(BaseContext):
         """
         self.ensure_initialized()
 
-        if not filter:
+        if not search_filter:
             raise ValueError(f"Missing delete filter value")
 
         def delete_work():
@@ -793,6 +839,9 @@ class LangchainWrapper(BaseContext):
                 self, DefaultFactories.LLM, self.llm_factory, mandatory=True
             )
 
+        if self.llm is None:
+            raise ValueError("Unable to get LLM")
+
         return self.llm
 
     def get_chain(self, **kwargs) -> Chain:
@@ -804,7 +853,16 @@ class LangchainWrapper(BaseContext):
         """
         self.ensure_initialized()
 
-        chain_args = {**self.chain_factory, **kwargs}
+        chain_factory = self.chain_factory
+
+        # if chain factory is a string, it is the qualified name of a factory
+
+        if isinstance(chain_factory, str):
+            chain_args = {"factory": chain_factory, **kwargs}
+        elif isinstance(chain_factory, dict):
+            chain_args = {**chain_factory, **kwargs}
+        else:
+            chain_args = {}
 
         chain = LangchainWrapper.get_instance_from_factory(
             self, DefaultFactories.CHAIN, chain_args, mandatory=True

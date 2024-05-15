@@ -4,6 +4,7 @@ from langchain.document_loaders.base import BaseLoader
 from langchain.schema import Document
 
 from eurelis_kb_framework.base_factory import BaseFactory
+from eurelis_kb_framework.types import FACTORY
 
 
 class ListLoader(BaseLoader):
@@ -14,7 +15,7 @@ class ListLoader(BaseLoader):
     def __init__(
         self,
         targets: Sequence[str],
-        loader: BaseFactory[BaseLoader],
+        loader: FACTORY,
         varname: str,
         parameters: dict,
         context,
@@ -23,7 +24,7 @@ class ListLoader(BaseLoader):
         Constructor
         Args:
             targets (Sequence[str]: list of targets (strings)
-            loader (BaseFactory[BaseLoader]): parameter to get the under the hood loader factory
+            loader (FACTORY): parameter to get the under the hood loader factory
             varname (str): name of the parameter on the sub-factory to provide target value with
             parameters (dict): parameters for the under the hood loader factory
             context: the context object, usually the current langchain wrapper instance
@@ -51,7 +52,7 @@ class ListLoader(BaseLoader):
             loader_factory = self.context.loader.instantiate_factory(
                 "eurelis_kb_framework.document_loaders",
                 "GenericLoaderFactory",
-                self.loader.copy(),
+                self.loader.copy() if isinstance(self.loader, dict) else self.loader,
             )
             loader_factory.set_params(params)
 

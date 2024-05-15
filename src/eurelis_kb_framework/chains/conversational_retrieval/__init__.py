@@ -1,4 +1,4 @@
-from typing import Union, Any
+from typing import Union, Any, TYPE_CHECKING
 
 from langchain.chains.base import Chain
 from langchain.prompts import (
@@ -15,16 +15,22 @@ from eurelis_kb_framework.base_factory import (
 )
 from eurelis_kb_framework.types import FACTORY
 
+if TYPE_CHECKING:
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
-def _extract_list_or_string(value: Union[str, list]) -> Any:
+
+def _extract_list_or_string(value: Any) -> Any:
     if isinstance(value, list) and all(isinstance(item, str) for item in value):
         return " ".join(value)
+    elif not isinstance(value, str):
+        raise ValueError(
+            f"Unexpected value given to _extract_list_or_string, expected single string or list of string got {type(value)}"
+        )
 
     return value
 
 
 class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
-
     """
     Factory for the conversational retrieval chain
     """
@@ -42,11 +48,14 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
         self.output_field = None
 
     def set_condense_question_llm(self, value: FACTORY):
-        if not isinstance(value, (str, dict)):
+        if isinstance(value, dict):
+            self.condense_question_llm_factory = value.copy()
+        elif isinstance(value, str):
+            self.condense_question_llm_factory = value
+        else:
             raise ValueError(
-                "condense_question_llm parameter is expected to be a factory (str ou dict)"
+                f"condense_question_llm parameter is expected to be a factory (str ou dict), got {value} {type(value)}"
             )
-        self.condense_question_llm_factory = value.copy()
 
     def set_condense_question_prompt(self, value: Union[str, list]):
         value = _extract_list_or_string(value)
@@ -103,7 +112,7 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
         """
         self.memory = memory
 
-    def build(self, context: "LangchainWrapper") -> Chain:
+    def build(self, context: "BaseContext") -> Chain:
         """
         Construct the chain
 
@@ -114,6 +123,12 @@ class ConversationalRetrievalChainFactory(ParamsDictFactory[Chain]):
             langchain chain
         """
         from langchain.chains import ConversationalRetrievalChain
+        from eurelis_kb_framework.langchain_wrapper import LangchainWrapper
+
+        if not isinstance(context, LangchainWrapper):
+            raise RuntimeError(
+                "ConversationalRetrievalChain must be used with a LangchainWrapper instance as context"
+            )
 
         memory = None
 

@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast, Mapping
 
 from eurelis_kb_framework.acronyms.acronyms_document_transformer import (
     AcronymsDocumentTransformer,
@@ -14,7 +14,7 @@ from eurelis_kb_framework.types import FACTORY
 from eurelis_kb_framework.utils import parse_param_value
 
 if TYPE_CHECKING:
-    from eurelis_kb_framework.langchain_wrapper import LangchainWrapper
+    from eurelis_kb_framework.langchain_wrapper import BaseContext
 
 
 class DatasetFactory(ParamsDictFactory[Dataset]):
@@ -114,9 +114,12 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
                 output_folder = parse_param_value(output)
             elif isinstance(output, dict):
                 output_folder = parse_param_value(output.get("folder"))
-                output_file_varname = parse_param_value(output.get("varname", "id"))
+                output_file_varname = cast(
+                    str, parse_param_value(output.get("varname", "id"))
+                )
 
-        instance.set_output_folder(output_folder)
+        if output_folder:
+            instance.set_output_folder(output_folder)
         instance.set_output_file_varname(output_file_varname)
 
         template = self.params.get("text_template")
@@ -136,7 +139,7 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
 
         instance.set_index(index)
 
-    def build(self, context: "LangchainWrapper") -> Dataset:
+    def build(self, context: "BaseContext") -> Dataset:
         """
         Method to build the dataset object
         Args:
@@ -146,6 +149,13 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
             a dataset instance
 
         """
+        from eurelis_kb_framework.langchain_wrapper import LangchainWrapper
+
+        if not isinstance(context, LangchainWrapper):
+            raise ValueError(
+                "DatasetFactory should be used with LangchainWrapper instance as context"
+            )
+
         loader = context.__class__.get_instance_from_factory(
             context,
             DefaultFactories.DOCUMENT_LOADER,
@@ -171,7 +181,7 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
             )
             if embeddings:
                 local_context = context.copy_context()
-                local_context.embeddings = embeddings
+                local_context.opt_embeddings = embeddings
                 vector_store = context.__class__.get_instance_from_factory(
                     local_context,
                     DefaultFactories.VECTORSTORE,
@@ -202,12 +212,17 @@ class DatasetFactory(ParamsDictFactory[Dataset]):
         Returns:
 
         """
-        result = OrderedDict()
+        result: OrderedDict[str, Dataset] = OrderedDict()
 
         if not data:
             return result
 
-        dataset_data_list = [data] if isinstance(data, dict) else data
+        if isinstance(data, dict):
+            dataset_data_list = cast(list[Mapping[str, JSON]], [data])
+        elif isinstance(data, list):
+            dataset_data_list = cast(list[Mapping[str, JSON]], data)
+        else:
+            raise ValueError("Expecting dataset to be either a dictionary or a list")
 
         for dataset_data in dataset_data_list:
             factory = DatasetFactory()

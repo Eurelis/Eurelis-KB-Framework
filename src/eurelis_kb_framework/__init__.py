@@ -4,6 +4,7 @@ from typing import Optional, TYPE_CHECKING
 
 from .base_factory import BaseFactory, T
 from .langchain_wrapper import LangchainWrapper
+from .output import VERBOSE_VALUE
 
 if TYPE_CHECKING:
     from eurelis_kb_framework.langchain_wrapper import BaseContext
@@ -26,7 +27,7 @@ class LangchainWrapperFactory(BaseFactory[LangchainWrapper]):
         """
         self.config_path = path
 
-    def set_verbose(self, verbose: bool):
+    def set_verbose(self, verbose: VERBOSE_VALUE):
         """
         Setter for the verbose parameter
         Args:

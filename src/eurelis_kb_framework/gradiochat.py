@@ -1,9 +1,9 @@
 import textwrap
-from typing import Optional
+from typing import Optional, Dict, Any
 
-import gradio as gr
+import gradio as gr  # type: ignore[import-not-found]
 
-memory = {"documents": [], "selfcheck": None}
+memory: Dict[str, Any] = {"documents": [], "selfcheck": None}
 
 
 def markdown_from_memory() -> str:
@@ -27,7 +27,7 @@ def selfcheck_from_memory() -> Optional[dict]:
 
 
 def define_chatbot(wrapper, selfcheck: bool = False):
-    define_chatbot.chain = wrapper.get_chain()
+    setattr(define_chatbot, "chain", wrapper.get_chain())
 
     if selfcheck:
         from eurelis_kb_framework.addons.checker.chat_checker import ChatChecker
@@ -35,12 +35,18 @@ def define_chatbot(wrapper, selfcheck: bool = False):
             CheckInputCallback,
         )
 
-        define_chatbot.selfcheck = ChatChecker(wrapper.lazy_get_llm())
-        define_chatbot.callbacks = [
-            CheckInputCallback(define_chatbot.selfcheck, method=None, language="en")
-        ]
+        setattr(define_chatbot, "selfcheck", ChatChecker(wrapper.lazy_get_llm()))
+        setattr(
+            define_chatbot,
+            "callbacks",
+            [
+                CheckInputCallback(
+                    getattr(define_chatbot, "selfcheck"), method=None, language="en"
+                )
+            ],
+        )
     else:
-        define_chatbot.callbacks = []
+        setattr(define_chatbot, "callbacks", [])
 
     with gr.Blocks() as demo:
         with gr.Row():
@@ -62,8 +68,9 @@ def define_chatbot(wrapper, selfcheck: bool = False):
         def bot(history):
             memory["documents"] = []
             memory["selfcheck"] = None
-            chain_answer = define_chatbot.chain(
-                history[-1][0], callbacks=define_chatbot.callbacks
+            chain = getattr(define_chatbot, "chain")
+            chain_answer = chain.invoke(
+                history[-1][0], {"callbacks": getattr(define_chatbot, "callbacks")}
             )
 
             if selfcheck:
@@ -79,7 +86,7 @@ def define_chatbot(wrapper, selfcheck: bool = False):
 
         def clear_lambda():
             memory["documents"] = []
-            define_chatbot.chain = wrapper.get_chain()
+            setattr(define_chatbot, "chain", wrapper.get_chain())
             return None
 
         msg.submit(user, [msg, chatbot], [msg, chatbot], queue=False).then(

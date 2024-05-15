@@ -25,7 +25,7 @@ class OutputFactory(BaseFactory[Output]):
     Console output factory
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.verbosity_level: Verbosity = Verbosity.LOG_INFO
 
     def set_verbose(self, verbose: VERBOSE_VALUE):

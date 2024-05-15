@@ -13,10 +13,10 @@ class CheckInputCallback(BaseCallbackHandler):
         self, checker, method: Optional[Method] = Method.NLI, language: str = "en"
     ):
         super().__init__()
-        self.messages = []
+        self.messages: List[BaseMessage] = []
         self.checker: ChatChecker = checker
-        self.method = method
-        self.language = language
+        self.method: Optional[Method] = method
+        self.language: str = language
 
     def on_chat_model_start(
         self,
@@ -38,6 +38,11 @@ class CheckInputCallback(BaseCallbackHandler):
     ) -> Any:
         if parent_run_id is None and "answer" in outputs:  # last chain_end
             answer = outputs.get("answer")
+
+            if not isinstance(answer, str):
+                raise RuntimeError(
+                    f"answer value should be a string not {type(answer)}"
+                )
 
             values = self.checker.check(
                 CheckInput(self.messages, answer, self.language), self.method

@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from langchain.document_loaders.base import BaseLoader
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory
-from eurelis_kb_framework.types import FACTORY
+from eurelis_kb_framework.types import FACTORY, PARAMS
 
 if TYPE_CHECKING:
     from eurelis_kb_framework.langchain_wrapper import BaseContext
@@ -46,16 +46,17 @@ class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
         """
         self.parser_data = parser_data
 
-    def _process_parser_data(self, context, arguments: dict):
+    def _process_parser_data(self, context, args: PARAMS) -> PARAMS:
         """
         Helper method to add a 'parser' argument to a dict
         Args:
             context: the context object, usually the current langchain wrapper instance
-            arguments: the dict to add the parser to
+            args: the dict to add the parser to
 
         Returns:
 
         """
+        arguments = {**args}
         if self.parser_data and self.parser_data != "default":
             if isinstance(self.parser_data, str):
                 parser_data = {"factory": self.parser_data}
@@ -71,6 +72,8 @@ class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
             )
             arguments["parser"] = parser.build(context)
 
+        return arguments
+
     def build(self, context: "BaseContext") -> BaseLoader:
         """
         Construct the document loader
@@ -84,7 +87,6 @@ class FSLoaderFactory(ParamsDictFactory[BaseLoader]):
         """
         from langchain_community.document_loaders.generic import GenericLoader
 
-        arguments = self.get_optional_params()
-        self._process_parser_data(context, arguments)
+        arguments = self._process_parser_data(context, self.get_optional_params())
 
-        return GenericLoader.from_filesystem(self.path, **arguments)
+        return GenericLoader.from_filesystem(self.path, **arguments)  # type: ignore[arg-type]

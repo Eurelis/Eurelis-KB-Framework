@@ -3,6 +3,7 @@ from typing import Tuple, cast, TYPE_CHECKING
 from langchain.text_splitter import TextSplitter
 
 from eurelis_kb_framework.base_factory import ParamsDictFactory, PARAMS
+from eurelis_kb_framework.types import CLASS
 
 if TYPE_CHECKING:
     from eurelis_kb_framework.langchain_wrapper import BaseContext
@@ -102,15 +103,18 @@ class GenericTextSplitterFactory(ParamsDictFactory[TextSplitter]):
         if not self.provider:
             raise ValueError(f"Missing provider parameter")
 
-        provider_data = TEXT_SPLITTER_ALLOWED_TYPES.get(self.provider)
+        if self.provider not in TEXT_SPLITTER_ALLOWED_TYPES:
+            raise ValueError(f"Invalid text splitter {self.provider}")
 
-        provider_data_set: set[str] = cast(set[str], provider_data[1])
+        provider_data_class, provider_data_set = TEXT_SPLITTER_ALLOWED_TYPES[
+            self.provider
+        ]
 
         splitter_arguments = self.extract_params(
             provider_data_set | TEXT_SPLITTER_ALLOWED_PARAMS
         )
 
-        return provider_data[0], splitter_arguments
+        return provider_data_class, splitter_arguments
 
     def build(self, context: "BaseContext") -> TextSplitter:
         """
@@ -126,7 +130,7 @@ class GenericTextSplitterFactory(ParamsDictFactory[TextSplitter]):
             arguments,
         ) = self._extract_arguments()  # first to ensure a provider has been given
 
-        instantiate_params = {"class": class_name, "kwargs": arguments}
+        instantiate_params = cast(CLASS, {"class": class_name, "kwargs": arguments})
 
         return cast(
             TextSplitter,
